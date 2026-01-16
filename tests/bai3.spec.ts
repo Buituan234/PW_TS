@@ -6,10 +6,15 @@
 
 import { test, expect } from '@playwright/test';
 
-test('Vai tro ngam dinh', async ({ page }) => {
-    await page.goto('https://demoapp-sable-gamma.vercel.app')
-    await page.getByRole('link', { name: 'Bài 2: Playwright Locators' }).click()
-    await page.getByRole('button', { name: 'CSS Selector' }).click()
+test('Xpath selector', async ({ page }) => {
+    // await page.goto('https://demoapp-sable-gamma.vercel.app')
+    // await page.getByRole('link', { name: 'Bài 2: Playwright Locators' }).click()
+    // await page.getByRole('button', { name: 'CSS Selector' }).click()
+    await page.goto('https://demoapp-sable-gamma.vercel.app/')
+    await page.getByRole('link', {name: 'Bài 2: Playwright Locators'}).click()
+    await page.getByRole('button', {name: 'Playwright getBy Nâng cao'}).click()
+    await page.getByLabel('Email:').highlight()
+    //await page.locator('//input[@placeholder="Email"]').fill('bpmtuan@gmail.com')
     //page.getByRole('link',{name: 'Trang chủ}).click()
     // const linkLocator = page.getByRole('link', { name: 'Trang chủ' })
     // console.log(' Phan tu o tren web', await linkLocator.count());
@@ -59,7 +64,9 @@ test('Vai tro ngam dinh', async ({ page }) => {
 
     // await page.pause()
 
-    await page.locator('.edit-profile-btn').click()
+    // await page.locator('.edit-profile-btn').click()
+
+    // await page.locator('[placeholder="Nhập email"]').fill('Buituan@gmail.com')
     // await page.locator('#password-input').fill('123')
     // const submit_button = page.locator('#login-submit-btn')
     // await submit_button.click()
@@ -67,5 +74,30 @@ test('Vai tro ngam dinh', async ({ page }) => {
 });
 
 
+//<input placeholder="Nhập tên đăng nhập" type="text" name="username" style="padding: 8px; border: 1px solid rgb(204, 204, 204); border-radius: 4px;">
+// tag = input x
+// id khong có x
+// className khong có
+//[placeholder='Nhập tên đăng nhập']
+
+//<input placeholder="Nhập email" type="email" name="email" style="padding: 8px; border: 1px solid rgb(204, 204, 204); border-radius: 4px;">
+
+//<button id="btn-user-profile-123" style="background-color: rgb(0, 123, 255); color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">User Profile</button>
+// #btn-user-profile-123.count() = 1
+// #btn-user-profile-456.count() = 1
+//button[id*="profile"] =>count() =2
+
+
 //1 the dau tien sau dau < thi tat ca cac phan tu tiep theo dc goi la attribute hay la thuoc tinh
 // <input id="username-input" type="text" style="width: 200px; padding: 5px; border: 1px solid rgb(204, 204, 204)
+
+//<div id="header" class="sticky visible" data-testid="main-header" style="background-color: rgb(248, 249, 250); padding: 10px; border: 2px solid rgb(0, 123, 255); border-radius: 4px; color: rgb(51, 51, 51);">Header (sticky + visible)</div>
+// Id: header
+//data-testid="main-header"
+// class: .visible
+// locator('#header[data-testid=''main-header].visible')
+
+// <input required placeholder="Bắt buộc" type="text" name="username" style="padding: 6px; border: 1px solid rgb(221, 221, 221); border-radius: 4px;">
+// input[placeholder='Bắt buộc'][required]
+// =
+// input:required
