@@ -183,7 +183,7 @@ test('Bài 2', async ({ page }) => {
         role: 'student',
         active: true,
         premium: false
-})
+    })
 });
 
 //bài 3: Check category chứa audio và category có đội dài là 3 phần tử
@@ -209,4 +209,140 @@ test('Bài 4', async ({ page }) => {
     const valueBoolean = Boolean(valueInStock)
     expect(valueBoolean).toBeTruthy()
 });
+
+// .toHaveproperty
+test('toHaveProperty', async ({ page }) => {
+    const user = {
+        id: 1,
+        name: 'Alice',
+        address: {
+            street: '123 Main St',
+            city: 'Wonderland'
+        },
+        isActive: true
+    }
+    expect(user).toHaveProperty('name')
+    expect(user).toHaveProperty('name','Alice')
+    expect(user).toHaveProperty('address.city')
+    expect(user).toHaveProperty('address.city', 'Wonderland')
+    expect(user).toHaveProperty('isActive',true)
+})
+
+//toHaveLength: dùng để tinhs độ dài trong mảng
+test('toHaveLength', async ({ page }) => {
+    const fruits = ['Cam','Xoài','Chuối']
+    const emptyArr:string[] = []
+    expect(fruits).toHaveLength(3)
+    expect(emptyArr).toHaveLength(0)
+    //Pass
+    expect(emptyArr).toBeTruthy()
+})
+
+//expect(actualObjet).toEqual(expect.objectContaining(subsetObject)) 
+test('objectContaining', async ({page}) => {
+    const apiResponse = {
+        id: 'txn-123',
+        status: 'completed',
+        amount: 50,
+        timeStamp: '2025-10-28'
+    }
+    const expectedCoreData = {
+        status: 'completed',
+        amount: 50
+    }
+    expect(apiResponse).toEqual(expect.objectContaining(expectedCoreData))
+    //fail > cha không có cặp key value nào là status: 'pending'
+    expect(apiResponse).toEqual(expect.objectContaining({status: 'pending'}))
+    // có thể thay đổi thứ tự các phần tử trong mảng, khác với toEqual bình thường
+})
+
+//expect(actualArray).toEqual(expect.arrayContaining(subSetArray))
+// các phần tử trong mảng con phải chứa trong mảng cha, có thể thay đổi thứ tự
+test('ArrayContaining', async ({page}) => {
+    const userPermissions = ['read', 'write', 'comment', 'delete']
+    const requirePermissions = ['delete', 'read']
+
+    expect(userPermissions).toEqual(expect.arrayContaining(requirePermissions))
+
+})
+
+
+//Obejct lồng nhau, vì objectContaining không thể so sánh quá sâu (lớp 1 của object) nên phần subset cũng phải set expectContaining để check bên trong
+test('objectContainingnested', async ({page}) => {
+    const apiResponse = {
+        id: 'txn-123',
+        status: 'completed',
+        user: {
+            id: 123,
+            name: 'alice',
+            email: 'Alice@gmail.com'
+        },
+        amount: 50,
+        timeStamp: '2025-10-28'
+    }
+    const expectedCoreData = {
+        status: 'completed',
+        user: expect.objectContaining({
+            id: 123,
+            name: 'alice'
+        })
+    }
+    expect(apiResponse).toEqual(expect.objectContaining(expectedCoreData))
+})
+
+//Bài tập
+// Chiến lược giải quyết UI
+//UI có 4 card > Mục đích là lấy hết thông tin của 4 card
+// for loop vòng lặp > lặp qua các thẻ phikm để lấy thông tị
+// Cuối cùng mình đẩy thông tin vào một mảng
+interface IMovieData {
+    id: number,
+    title: string,
+    year: number,
+    rating: number,
+    genres: string[],
+    isLiked: boolean,
+    inList: boolean
+}
+
+test('baiTap', async ({page}) => {
+    await page.goto(DEMO_URL)
+    await page.getByRole('link', { name: 'Bài 3: Tổng hợp Text Methods' }).click()
+    await page.getByRole('tab', {name: '✅ Expect Assertions'}).click()
+
+    //Tìm locator của 4 thẻ phim
+    // tìm div ngang hàng với div chứa 4 thẻ phim vì nó có phần title làm mỏ neo
+    // //div[@class= "ant-card-head" and contains(.,"Danh sách phim")] 
+    // lướt xuống vị trí ngay sau phần div đang dùng, chứa 4 thẻ phim
+    // /following-sibling::div[1]
+    // chọn vào 4 thẻ phim và lấy theo con cháu của div ô cha và có chứa class riêng biệt
+    // //div[contains(@class,"movie-card")
+    const movieCards = await page.locator('//div[@class= "ant-card-head" and contains(.,"Danh sách phim")]/following-sibling::div[1]//div[contains(@class,"movie-card")]').all()
+    console.log('Số lượng phần tử: ',movieCards.length);
+    expect(movieCards).toHaveLength(4)
+    const movieData: IMovieData[] = []
+    for (const element of movieCards){
+        //index = 0 => Silent code
+        const card = element
+
+        // lấy thông tin thẻ phim
+        const dataTitle = await card.getAttribute('data-title')
+        const dataYear = await card.getAttribute('data-year')
+        const dataRating = await card.getAttribute('data-rating')
+        const dataGenres = await card.getAttribute('data-genres')
+
+        const titleText = await card.locator('.ant-card-meta-detail span').nth(0).innerText()
+        //Nếu dùng xPath thì đằng trước vị trí cần thêm dấu chấm
+        //const titleText = await card.locator('.//div[@class = 'ant-card-meta-detail']//span').nth(0).innerText()
+        console.log('TitleText', titleText);
+        
+        const ratingText = await card.locator('.ant-card-meta-detail span').nth(1).innerText()
+        console.log('RatingText', ratingText);
+        const yearText = await card.locator('.ant-card-meta-description div div').nth(0).innerText()
+        console.log('yearText', yearText);
+        await page.pause()
+    }
+    
+})
+//bài tập này hiện tại tạm dừng để học tiếp phần khác
 
