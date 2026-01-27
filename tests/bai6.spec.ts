@@ -147,9 +147,8 @@ test('Keyboard actions', async ({ page }) => {
     await page.pause()
 
     // Undo / Redo
-    await page.keyboard.press('Control+z');
-    await page.keyboard.press('Control+y');
+    // await page.keyboard.press('Control+z');
+    // await page.keyboard.press('Control+y');
 
-    await page.pause()
 
 });
