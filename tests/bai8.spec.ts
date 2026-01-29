@@ -197,7 +197,11 @@ test('Ví dụ về evaluate', async ({ page }) => {
 
 });
 
-async function isImageOK(page: Page, imgLocator: string): Promise<boolean> {
+export async function isImageOK(page: Page, imgLocator: string): Promise<boolean> {
+    const img = page.locator(imgLocator);
+
+    await expect(img).toBeVisible(); // element hiển thị
+    await expect(img).toHaveJSProperty('complete', true); // ảnh đã load xong
     const result = await page
         .locator(imgLocator)
         .evaluate(
@@ -206,7 +210,7 @@ async function isImageOK(page: Page, imgLocator: string): Promise<boolean> {
                 console.log('height: ', img.naturalHeight);
                 return img.complete && img.naturalWidth > 0 && img.naturalHeight > 0
             })
-    return result 
+    return result
 }
 test('Ví dụ về check ảnh đã load ok chưa?', async ({ page }) => {
     await page.goto(DEMO_URL)
@@ -216,10 +220,72 @@ test('Ví dụ về check ảnh đã load ok chưa?', async ({ page }) => {
     // const checkImageTrue = await isImageOK(page, '#img-1')
     // expect(checkImageTrue).toBeTruthy()
 
+    page.on('console', (msg) => console.log('[BROWSER]', msg.text())); // Giăng cái bẫy ra để lấy được 2 clg trong fucntion check ảnh ok chưa
     const checkImageFalse = await isImageOK(page, '#img-2')
     expect(checkImageFalse).toBeFalsy()
 
 
     await page.pause()
 
+});
+
+test('Ví dụ về evaluate - tiếp', async ({ page }) => {
+    await page.goto(DEMO_URL)
+    await page.getByRole('link', { name: 'Bài 5: Shadow DOM & iFrame' }).click()
+    await page.getByRole('tab', { name: '🖼️ Broken Images' }).click()
+
+    // const panel = page.getByRole('tabpanel', { name: '🔧 evaluate()' });
+  // const input = panel.locator('#demo-input-1');
+
+  // // 1) Gõ nội dung
+  // await input.fill('Hello Playwright');
+
+  // // 2) Chọn đoạn text “Hello” (từ index 0 đến 5)
+  // await input.evaluate((el: HTMLInputElement) => {
+  //   el.setSelectionRange(0, 5, 'forward');
+  // });
+
+  // await page.pause();
+
+  // // 3) Đọc selection range (cần evaluate)
+  // const selection = await input.evaluate((el: HTMLInputElement) => ({
+  //   selectionStart: el.selectionStart,
+  //   selectionEnd: el.selectionEnd,
+  //   selectionDirection: el.selectionDirection,
+  // }));
+  // console.log(selection); // { selectionStart: 0, selectionEnd: 5, selectionDirection: 'forward' }
+
+  // // 4) Thay thế đoạn đã chọn bằng chuỗi khác (mô phỏng user gõ)
+  // await input.type('Hi');
+  // // Lúc này value: "Hi Playwright"
+
+  // // 5) Chọn từ vị trí 3 đến hết và xoá
+  // await input.evaluate((el: HTMLInputElement) => {
+  //   el.setSelectionRange(3, el.value.length, 'backward');
+  // });
+  // await page.keyboard.press('Delete');
+  // Kỳ vọng: còn lại "Hi "
+
+  const element = page.locator('#style-demo-element');
+
+  // Đọc một style property
+  const backgroundColor = await element.evaluate((el: HTMLElement) => {
+    return window.getComputedStyle(el).backgroundColor;
+  });
+  console.log('Background color:', backgroundColor); // "rgb(230, 247, 255)"
+
+  // Đọc nhiều styles cùng lúc
+  const styles = await element.evaluate((el: HTMLElement) => {
+    const computed = window.getComputedStyle(el);
+    return {
+      backgroundColor: computed.backgroundColor,
+      color: computed.color,
+      fontSize: computed.fontSize,
+      fontWeight: computed.fontWeight,
+      padding: computed.padding,
+      border: computed.border,
+      borderRadius: computed.borderRadius,
+    };
+  });
+  console.log('All styles:', styles);
 });
