@@ -34,7 +34,8 @@ function createRandomUser() {
         city: faker.location.city(),
         state: faker.location.state(),
         zipCode: faker.location.zipCode(),
-        country: "Vietnam"
+        country: "Vietnam",
+        existCompanyName: "Company A"
     };
 }
 
@@ -158,7 +159,7 @@ test.describe('CRM Customer Page - Positive case', () => {
         //     .click()
         // await page.locator('//a[@id="bs-select-3-11"]').scrollIntoViewIfNeeded()
         // await page.locator('//a[@id="bs-select-3-11"]').click()
-        
+
         // Cách 2
         const defaultLanguage = page.locator('//select[@id="default_language"]')
         await defaultLanguage.selectOption('Vietnamese')
@@ -193,12 +194,163 @@ test.describe('CRM Customer Page - Positive case', () => {
         await expect(page.locator('input#phonenumber')).toHaveAttribute('value', informationField.phone)
         await expect(page.locator('//select[@id="default_currency"]//following-sibling::button//div[@class="filter-option-inner-inner"]'))
             .toHaveText(informationField.currency)
-        await expect(page.locator('//select[@id="default_language"]//following-sibling::button')).toHaveAttribute("title","Vietnamese")
+        await expect(page.locator('//select[@id="default_language"]//following-sibling::button')).toHaveAttribute("title", "Vietnamese")
         await expect(page.locator('textarea#address')).toContainText(informationField.address)
         await expect(page.locator('input#city')).toHaveValue(informationField.city)
         await expect(page.locator('input#state')).toHaveValue(informationField.state)
         await expect(page.locator('input#zip')).toHaveValue(informationField.zipCode)
         await expect(page.locator('//select[@id="country"]//following-sibling::button[@type="button"]//div[@class="filter-option-inner-inner"]'))
             .toHaveText(informationField.country)
+    })
+})
+
+test.describe('CRM Customer Page - UI/Functionality', () => {
+    test('TC_CUST_04 - Kiểm tra "Same as Customer info"', async ({ page }) => {
+        // Đăng nhập vào web
+        await page.goto('https://crm.anhtester.com/admin/authentication')
+        await expect(page.getByRole('heading', { level: 1 })).toContainText('Login')
+
+        // Điền email/password và đăng nhập
+        await page.locator('#email').fill('admin@example.com')
+        await page.locator('#password').fill('123456')
+        await page.locator('//button[@type="submit"]').click()
+        await expect(page.locator('//aside[@id="menu"]//li[contains(@class,"menu-item-dashboard")]//span')).toContainText('Dashboard')
+
+        //nhảy vào trạng để tạo mới Customer
+        await page.locator('//li[@class="menu-item-customers"]//a[@href="https://crm.anhtester.com/admin/clients"]').click()
+        await expect(page.locator('//div[@class="_buttons"]//a').nth(0)).toContainText('New Customer')
+        await page.locator('//div[@class="_buttons"]//a').nth(0).click()
+        await expect(page.locator('//ul[contains(@class,"customer-profile-tabs")]//a[@aria-controls="contact_info"]')).toContainText('Customer Details')
+
+        // Điền thông tin của customer mới
+        const informationCust = createRandomUser()
+        const dateNow = new Date()
+        const dateNowFormat = format(dateNow, 'hh:mm:ss yyyy/MM/dd')
+        const companyName = `Company name auto ${dateNowFormat}`
+        await page.locator('#company').fill(companyName)
+        await page.locator('#vat').fill(informationCust.vat)
+        await page.locator('#phonenumber').fill(informationCust.phone)
+        await page.locator('#website').fill(informationCust.website)
+        await page.locator('#vat').fill(informationCust.vat)
+        await page.locator('//select[@id="default_currency"]').selectOption(informationCust.currency)
+        await page.locator('//select[@id="default_language"]').selectOption(informationCust.language)
+        await page.locator('#address').fill(informationCust.address)
+        await page.locator('#city').fill(informationCust.city)
+        await page.locator('#state').fill(informationCust.state)
+        await page.locator('#zip').fill(informationCust.zipCode)
+        await page.locator('//select[@id="country"]').selectOption(informationCust.country)
+
+        //Nhảy qua tab "Billing & Shipping"
+        await page.locator('//ul[contains(@class, "customer-profile-tabs")]//a[@href="#billing_and_shipping"]').click()
+        await expect(page.locator('//div[@id="billing_and_shipping"]//a[contains(@class,"billing-same-as-customer")]'))
+            .toContainText('Same as Customer Info')
+
+        // Nhấn vào nút "Same as Customer Info" và check kết quả
+        await page.locator('//div[@id="billing_and_shipping"]//a[contains(@class,"billing-same-as-customer")]').click()
+        await expect(page.locator('#billing_street')).toHaveValue(informationCust.address)
+        await expect(page.locator('#billing_city')).toHaveValue(informationCust.city)
+        await expect(page.locator('#billing_state')).toHaveValue(informationCust.state)
+        await expect(page.locator('#billing_zip')).toHaveValue(informationCust.zipCode)
+        await expect(page.locator('//button[@data-id="billing_country"]')).toHaveAttribute("title", informationCust.country)
+    })
+    test('TC_CUST_05 - Kiểm tra "Copy Billing Address"', async ({ page }) => {
+        // Đăng nhập vào web và nhảy đến tab Customers
+        await loginAndNavigateToNewCustomer(page, 'Customers')
+
+        //nhảy vào trạng để tạo mới Customer
+        // await page.locator('//li[@class="menu-item-customers"]//a[@href="https://crm.anhtester.com/admin/clients"]').click()
+        // await expect(page.locator('//div[@class="_buttons"]//a').nth(0)).toContainText('New Customer')
+        await page.locator('//div[@class="_buttons"]//a').nth(0).click()
+        await expect(page.locator('//ul[contains(@class,"customer-profile-tabs")]//a[@aria-controls="contact_info"]')).toContainText('Customer Details')
+
+        // Điền thông tin của customer mới
+        const informationCust = createRandomUser()
+        const dateNow = new Date()
+        const dateNowFormat = format(dateNow, 'hh:mm:ss yyyy/MM/dd')
+        const companyName = `Company name auto ${dateNowFormat}`
+        await page.locator('#company').fill(companyName)
+        await page.locator('#vat').fill(informationCust.vat)
+        await page.locator('#phonenumber').fill(informationCust.phone)
+        await page.locator('#website').fill(informationCust.website)
+        await page.locator('#vat').fill(informationCust.vat)
+        await page.locator('//select[@id="default_currency"]').selectOption(informationCust.currency)
+        await page.locator('//select[@id="default_language"]').selectOption(informationCust.language)
+        await page.locator('#address').fill(informationCust.address)
+        await page.locator('#city').fill(informationCust.city)
+        await page.locator('#state').fill(informationCust.state)
+        await page.locator('#zip').fill(informationCust.zipCode)
+        await page.locator('//select[@id="country"]').selectOption(informationCust.country)
+
+        //Nhảy qua tab "Billing & Shipping"
+        await page.locator('//ul[contains(@class, "customer-profile-tabs")]//a[@href="#billing_and_shipping"]').click()
+        await expect(page.locator('//div[@id="billing_and_shipping"]//a[contains(@class,"customer-copy-billing-address")]'))
+            .toContainText('Copy Billing Addres')
+
+        // Nhấn vào nút "Same as Customer Info" 
+        await page.locator('//div[@id="billing_and_shipping"]//a[contains(@class,"billing-same-as-customer")]').click()
+        const billingStreet = await page.locator('#billing_street').inputValue()
+        const billingCity = await page.locator('#billing_city').inputValue()
+        const billingState = await page.locator('#billing_state').inputValue()
+        const billingZip = await page.locator('#billing_zip').inputValue()
+        const billingCountry = await page.locator('//button[@data-id="billing_country"]').getAttribute("title")
+
+        // Nhấn vào nút "Copy billing address" và check kết quả
+        await page.locator('//div[@id="billing_and_shipping"]//a[contains(@class,"customer-copy-billing-address")]').click()
+        const shippingStreet = await page.locator('#shipping_street').inputValue()
+        expect(shippingStreet).toBe(billingStreet)
+        const shippingCity = await page.locator('#shipping_city').inputValue()
+        expect(shippingCity).toBe(billingCity)
+        const shippingState = await page.locator('#shipping_state').inputValue()
+        expect(shippingState).toBe(billingState)
+        const shippingZip = await page.locator('#shipping_zip').inputValue()
+        expect(shippingZip).toBe(billingZip)
+        const shippingCountry = await page.locator('//button[@data-id="shipping_country"]').getAttribute('title')
+        expect(shippingCountry).toBe(billingCountry)
+    })
+})
+
+test.describe('CRM Customer Pgae - Negative Validation', () => {
+    test('TC_CUST_06 - Bỏ trống trường Company', async ({ page }) => {
+        // Login và vào trang Customers
+        await loginAndNavigateToNewCustomer(page, 'Customers')
+        // Nhảy vào trang tạo mới Customer
+        await page.locator('//div[@class="_buttons"]//a').nth(0).click()
+        await expect(page.locator('//ul[contains(@class,"customer-profile-tabs")]//a[@aria-controls="contact_info"]')).toContainText('Customer Details')
+
+        // Điền thông tin các trường khác mà không điền tên Company
+        const informationCust = createRandomUser()
+        await page.locator('#vat').fill(informationCust.vat)
+        await page.locator('#phonenumber').fill(informationCust.phone)
+        await page.locator('#website').fill(informationCust.website)
+        await page.locator('#vat').fill(informationCust.vat)
+        await page.locator('//select[@id="default_currency"]').selectOption(informationCust.currency)
+        await page.locator('//select[@id="default_language"]').selectOption(informationCust.language)
+        await page.locator('#address').fill(informationCust.address)
+        await page.locator('#city').fill(informationCust.city)
+        await page.locator('#state').fill(informationCust.state)
+        await page.locator('#zip').fill(informationCust.zipCode)
+        await page.locator('//select[@id="country"]').selectOption(informationCust.country)
+
+        //Click Save và check trạng thái
+        await page.locator('//button[contains(@class,"only-save")]').click()
+        await expect(page).toHaveURL('https://crm.anhtester.com/admin/clients/client')
+        await expect(page.locator('//button[contains(@class,"only-save")]')).toBeAttached()
+        await expect(page.locator('#company-error')).toContainText('This field is required.')
+    })
+    test('TC_CUST_07 - Cảnh báo Company name tồn tại', async ({ page }) => {
+        // Login và vào trang Customers
+        await loginAndNavigateToNewCustomer(page, 'Customers')
+        // Nhảy vào trang tạo mới Customer
+        await page.locator('//div[@class="_buttons"]//a').nth(0).click()
+        await expect(page.locator('//ul[contains(@class,"customer-profile-tabs")]//a[@aria-controls="contact_info"]')).toContainText('Customer Details')
+
+        // Điền thông tin compnay đã tồn tại
+        const informationCust = createRandomUser()
+        await page.locator('#company').fill(informationCust.existCompanyName)
+
+        //Click ra bên ngoài ô và kiểm tra thông báo
+        await page.locator('//div[@class="form-group"]//label[@for="company"]').click()
+        await expect(page.locator('//div[@id="company_exists_info"]'))
+            .toContainText(`It looks that a customer with name ${informationCust.existCompanyName} already exists, if you still want to create the customer you can ignore this message.`)
     })
 })
