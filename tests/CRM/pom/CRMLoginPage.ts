@@ -6,9 +6,9 @@ export class CRMLoginPage extends BasePage {
     //Khai báo locator
     private readonly emailInput = this.page.locator('#email')
     private readonly passwordInput = this.page.locator('#password')
-    private readonly loginButton = this.page.getByRole('button', {name: 'Login'})
+    private readonly loginButton = this.page.getByRole('button', { name: 'Login' })
 
-    async goto(){
+    async goto() {
         await this.page.goto('https://crm.anhtester.com/admin/authentication')
     }
 
@@ -18,19 +18,16 @@ export class CRMLoginPage extends BasePage {
         await expect(this.page).toHaveURL(/admin\/authentication/)
     }
 
-    async login(email: string, password: string){
-        await this.emailInput.fill(email)
-        this.logfill(this.emailInput)
-        await this .passwordInput.fill(password)
-        this.logfill(this.passwordInput)
+    async login(email: string, password: string) {
+        await this.fillwithlog(this.emailInput, email)
+        await this.fillwithlog(this.passwordInput, password, {isSensitive: true, fillOption: {timeout: 10000}})
 
-        await this.loginButton.click()
-        this.logClick(this.loginButton)
+        await this.clickwithlog(this.loginButton)
         // Một số FW cũ sẽ dùng cách chuyển trang như này
         // được gọi là page chaining
         //return newDashBoardPage()
     }
-    async expectLoggedIn(){
+    async expectLoggedIn() {
         await expect(this.page).toHaveURL(/admin/)
     }
 }
