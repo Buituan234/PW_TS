@@ -22,7 +22,7 @@ export class CRMLoginPage extends BasePage {
         await this.fillwithlog(this.emailInput, email)
         await this.fillwithlog(this.passwordInput, password, {isSensitive: true, fillOption: {timeout: 10000}})
 
-        await this.clickwithlog(this.loginButton)
+        await this.clickwithlog(this.loginButton, {force: true})
         // Một số FW cũ sẽ dùng cách chuyển trang như này
         // được gọi là page chaining
         //return newDashBoardPage()
