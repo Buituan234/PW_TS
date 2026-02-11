@@ -14,7 +14,7 @@ export abstract class BasePage {
 
     }
 
-    protected async clickwithlog(locator: Locator, option?: Parameters<Locator['fill']>[0]){
+    protected async clickwithlog(locator: Locator, option?: Parameters<Locator['click']>[0]){
         await this.logClick(locator)
         await locator.click()
     }
@@ -53,5 +53,27 @@ export abstract class BasePage {
 
         return text
     }
+    protected get<T extends Record<string, string | ((page: Page) => Locator)>> (
+        locatorMap: T,
+        locatorName: keyof T
+    ): Locator {
+        const locatorDef = locatorMap[locatorName]
+        if(typeof locatorDef === 'function'){
+            return locatorDef(this.page)
+        }
+        return this.page.locator(locatorDef)
+    }
+    protected createLocatorGetter<T extends Record<string, string | ((page: Page) => Locator)>> (
+        locatorMap: T
+    ): (locator: keyof T) => Locator {
+        return (locatorName: keyof T): Locator => {
+            const locatorDef = locatorMap[locatorName]
+        if(typeof locatorDef === 'function'){
+            return locatorDef(this.page)
+        }
+        return this.page.locator(locatorDef)
+        }
+    }
+
     abstract expectOnPage(): Promise<void>
 }
