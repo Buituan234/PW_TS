@@ -85,3 +85,57 @@ const eventMap = {
 }
 const logList = createLogger(eventMap)
 logList('BTN_CLICK_HOME')
+
+
+// Kế thừa - kết hợp/thành phần (inheritance, composition)
+
+//Kế thừa là mối quan hệ (là một ...)
+// ví dụ con mèo là 1 động vật, giám đốc là 1 nhân viên
+// con cái thừa hưởng gen của bm
+
+// Kế hợp
+// Cái xe hơi có một động cơ (chứ không phải xe hơi là động cơ)
+// Tư duy: Lắp ráp logo: Tạo ra một vật thể lớn từ các mảnh ghép nhỏ
+
+// Class cha
+class SmartDevice {
+    connectWifi(){
+        console.log('connected wifi');
+    }
+    playMusicAndLight(){
+        console.log('vua hat vua chieu sang');
+        
+    }
+}
+
+class WifiModule {
+    connect() {
+        console.log(`đã connnect`);
+    }
+}
+
+class LightModule {
+    on() {
+        console.log(`đã bật`);
+    }
+}
+
+class SpeakerModule {
+    play(song: string){
+        console.log(`dang hat ${song}`);
+    }
+}
+
+class SingLight {
+    private wifi = new WifiModule()
+    private light = new LightModule()
+    private speaker = new SpeakerModule()
+
+    partyTime(){
+        this.wifi.connect()
+        this.light.on()
+        this.speaker.play('OLLAA')
+    }
+}
+const myPartyTime = new SingLight()
+myPartyTime.partyTime()
