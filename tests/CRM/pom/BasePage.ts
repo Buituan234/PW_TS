@@ -1,7 +1,12 @@
 import { Locator, Page } from "@playwright/test";
+import { CommonHelpers } from "../helpers/CommonHelpers";
 
 export abstract class BasePage {
-    constructor(protected page: Page) { }
+    protected helpers: CommonHelpers
+    constructor(protected page: Page) {
+        this.helpers = new CommonHelpers(page)
+    }
+    
     protected async logClick(locator: Locator) {
         const elementInfo = await this.getElementInfo(locator)
         console.log(`[Click] ${elementInfo}`);
