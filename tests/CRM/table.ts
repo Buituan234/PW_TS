@@ -83,3 +83,76 @@ function createColumnMap(rawHeader: string[]) {
 }
 const columnMap = createColumnMap(tableHeaders)
 console.log(columnMap);
+
+
+// Minh họa tạo map column và lưu cache
+let domReadCount = 0
+
+async function createColumnMapSimple(headersLocator) {
+    domReadCount++
+    console.log('[Dom] đang đọc Header để xây Map... (tốn 500ms)');
+    return{
+        name: {index: 0},
+        age: {index: 1},
+        email: {index: 2}
+    }
+}
+
+async function getColumnInfo(headers, key, cache) {
+    let map = cache
+    if (!map){
+        map = await createColumnMapSimple(headers)
+    }
+    return {info: map[key], columnMap: map}
+}
+
+
+async function getCellText() {
+    return 'Data'
+}
+
+async function buildRowData(headers, row, keys, cache) {
+    const rowData = {}
+    let currentMap = cache
+    for (const key of keys){
+        const result = await getColumnInfo(headers, key, currentMap)
+        // Cập nhật lại map cho vòng sau
+        currentMap = result.columnMap
+    }
+    return {rowData, columnMap: currentMap}
+}
+
+const keyToGet = ['name', 'age', 'email']
+const totoRows = 5
+
+async function runScenario(name, cacheStrategy) {
+    console.log(`Chay kich ban ${name}`);
+    domReadCount = 0
+
+    let globalCache = null
+
+    for (let i=0; i< totoRows; i++){
+        console.log(`Xu ly dong so ${i+1}`);
+        const inputCache = cacheStrategy? globalCache: null
+        const result = await buildRowData(null, null, keyToGet, inputCache)
+        if (inputCache){
+            globalCache= result.columnMap
+        } 
+    }
+
+    console.log(`So dong da xu ly ${totoRows}`);
+    console.log(`So lan doc lai headers: ${domReadCount}`);
+
+    if (domReadCount>1){
+        console.log('Hieu nang kem')
+    }
+    else {
+        console.log('Hieu nang tot');
+        
+    }
+}
+
+(async ()=> {
+    await runScenario('Khong dung cache', false)
+    await runScenario('Co dung cache', true)
+})()
