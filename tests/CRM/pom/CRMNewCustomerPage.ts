@@ -31,7 +31,7 @@ export class CRMNewCustomerPage extends BasePage {
 
         saveButton: (page: Page)=> page.locator('//div[@id="profile-save-section"]//button[normalize-space()="Save"]'),
 
-        asterik: (page: Page) => page.locator('label', { hasText: 'Company' }).locator('small', { hasText: '*' }),
+        asterik: (page: Page) => page.locator('label', { hasText: 'Company' }).locator('//small[normalize-space()="*"]'),
 
         currencyButton: (page: Page) => page.locator('//label[@for="default_currency"]//following-sibling::div[contains(@class,"dropdown")]'),
 

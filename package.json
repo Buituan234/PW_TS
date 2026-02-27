@@ -8,7 +8,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@playwright/test": "^1.56.0",
+    "@playwright/test": "^1.58.2",
     "@types/node": "^24.7.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
@@ -16,5 +16,17 @@
   "dependencies": {
     "@faker-js/faker": "^10.2.0",
     "date-fns": "^4.1.0"
-  }
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Buituan234/PW_TS.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Buituan234/PW_TS/issues"
+  },
+  "homepage": "https://github.com/Buituan234/PW_TS#readme"
 }
