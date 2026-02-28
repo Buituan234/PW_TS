@@ -1,42 +1,52 @@
-import { columnInfo, columnMap, createColumnMap } from "../helpers/TableColumnHelpers";
+import { columnInfo, columnMap, createColumnMap, getColumnValuesSimple } from "../helpers/TableColumnHelpers";
 import { BasePage } from "./BasePage";
 import { Locator, Page, expect } from "@playwright/test";
 
 export type CustomerColumnKey =
-  | 'select' // Cột checkbox (đầu tiên)
-  | 'rowNumber' // Cột # (số thứ tự)
-  | 'company' // Tên công ty
-  | 'primaryContact'
-  | 'primaryEmail'
-  | 'phone'
-  | 'active'
-  | 'groups'
-  | 'dateCreated';
+    | 'select' // Cột checkbox (đầu tiên)
+    | 'rowNumber' // Cột # (số thứ tự)
+    | 'company' // Tên công ty
+    | 'primaryContact'
+    | 'primaryEmail'
+    | 'phone'
+    | 'active'
+    | 'groups'
+    | 'dateCreated';
+
+export const DEFAULT_CUSTOMER_TABLE_COLUMNS: CustomerColumnKey[] = [
+    'company',
+    'primaryContact',
+    'primaryEmail',
+    'phone',
+    'active',
+    'groups',
+    'dateCreated',
+] as const;
 
 export class CRMCustomerPage extends BasePage {
 
-    private  columnMapCache: columnMap | null = null
+    private columnMapCache: columnMap | null = null
 
     private readonly pageLocators = {
-            newCustomerLink: (page: Page) => page.getByRole('link',{name: 'New Customer'}),
+        newCustomerLink: (page: Page) => page.getByRole('link', { name: 'New Customer' }),
 
-            tableHeaders: '#client thead th',
-            tableRows: '#client tbody tr',
-            searchInput: '#client_filter input[type="search"]',
-            tableProcessing: '#client_processing'
+        tableHeaders: '#client thead th',
+        tableRows: '#client tbody tr',
+        searchInput: '#client_filter input[type="search"]',
+        tableProcessing: '#client_processing'
     } as const
 
     public element = this.createLocatorGetter(this.pageLocators)
-    
+
     async expectOnPage(): Promise<void> {
         expect(this.element('newCustomerLink')).toBeVisible()
     }
 
-    private getRowsLocator(): Locator{
+    private getRowsLocator(): Locator {
         return this.element('tableRows')
     }
 
-    async waitForTableReady(){
+    async waitForTableReady() {
         const processing = this.element('tableProcessing')
         await expect(processing).not.toBeVisible()
 
@@ -47,24 +57,51 @@ export class CRMCustomerPage extends BasePage {
         await expect(rows.nth(0)).toBeVisible()
     }
 
-    private async buildColumnMap(): Promise<columnMap>{
+    private async buildColumnMap(): Promise<columnMap> {
         const headers = this.element('tableHeaders')
         return createColumnMap(headers)
     }
 
-    async clickAddNewCustomer(){
+    async clickAddNewCustomer() {
         await this.clickwithlog(this.element('newCustomerLink'))
     }
 
-    private async ensureColumnMapCache(): Promise<columnMap>{
-        if(!this.columnMapCache){
+    private async ensureColumnMapCache(): Promise<columnMap> {
+        if (!this.columnMapCache) {
             await this.waitForTableReady()
             this.columnMapCache = await createColumnMap(this.element('tableHeaders'))
         }
         return this.columnMapCache
     }
-    async getRowCount(): Promise<number>{
+    async getRowCount(): Promise<number> {
         await this.waitForTableReady()
         return this.getRowsLocator().count()
+    }
+
+    private get columnCleaner(): Record<string, ColumnTextCleaner> {
+        return {
+            company: async (cell: Locator) => {
+                const linkText = await cell.locator('a').first().textContent();
+                if (linkText && linkText.length > 0) {
+                    return linkText;
+                }
+                //abcView delete....
+                const raw = ((await cell.textContent()) || '').trim();
+                const actionIndex = raw.indexOf('View');
+                return actionIndex > 0 ? raw.slice(0, actionIndex).trim() : raw;
+            },
+        };
+    }
+
+    async getColumnValues(columnKey: CustomerColumnKey | string) {
+        await this.waitForTableReady()
+        const columnMap = await this.ensureColumnMapCache()
+        return getColumnValuesSimple(
+            this.element('tableHeaders'),
+            this.getRowsLocator(),
+            columnKey,
+            this.columnCleaner,
+            columnMap
+        );
     }
 }
