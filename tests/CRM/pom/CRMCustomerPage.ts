@@ -1,4 +1,12 @@
-import { columnInfo, columnMap, createColumnMap, getColumnValuesSimple } from "../helpers/TableColumnHelpers";
+import {
+    columnMap,
+    createColumnMap,
+    getColumnValuesSimple,
+    ColumnTextCleaner,
+    getTableDataSimple,
+    findRowByColumnValueSimple,
+    TextMatcher
+} from "../helpers/TableColumnHelpers";
 import { BasePage } from "./BasePage";
 import { Locator, Page, expect } from "@playwright/test";
 
@@ -30,10 +38,10 @@ export class CRMCustomerPage extends BasePage {
     private readonly pageLocators = {
         newCustomerLink: (page: Page) => page.getByRole('link', { name: 'New Customer' }),
 
-        tableHeaders: '#client thead th',
-        tableRows: '#client tbody tr',
-        searchInput: '#client_filter input[type="search"]',
-        tableProcessing: '#client_processing'
+        tableHeaders: '#clients thead th',
+        tableRows: '#clients tbody tr',
+        searchInput: '#clients_filter input[type="search"]',
+        tableProcessing: '#clients_processing'
     } as const
 
     public element = this.createLocatorGetter(this.pageLocators)
@@ -51,7 +59,7 @@ export class CRMCustomerPage extends BasePage {
         await expect(processing).not.toBeVisible()
 
         const headers = this.element('tableHeaders')
-        await expect(headers).toBeVisible()
+        await expect(headers.first()).toBeVisible()
 
         const rows = this.getRowsLocator()
         await expect(rows.nth(0)).toBeVisible()
@@ -104,4 +112,34 @@ export class CRMCustomerPage extends BasePage {
             columnMap
         );
     }
+
+    async getTableData(
+    coloumnKeys: Array<CustomerColumnKey | string>
+  ): Promise<Array<Record<string, string>>> {
+    await this.waitForTableReady();
+    const coloumnMap = await this.ensureColumnMapCache();
+    return getTableDataSimple(
+      this.element('tableHeaders'),
+      this.getRowsLocator(),
+      coloumnKeys,
+      this.columnCleaner,
+      coloumnMap
+    );
+  }
+
+    async findRowByColumnValue(
+    columnKey: CustomerColumnKey | string,
+    matcher: TextMatcher
+  ): Promise<Locator> {
+    await this.waitForTableReady();
+    const coloumnMap = await this.ensureColumnMapCache();
+    return findRowByColumnValueSimple(
+      this.element('tableHeaders'),
+      this.getRowsLocator(),
+      columnKey,
+      matcher,
+      this.columnCleaner,
+      coloumnMap
+    );
+  }
 }
