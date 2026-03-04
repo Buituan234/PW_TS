@@ -239,7 +239,7 @@ export async function findRowByFilterSimple(
   rowsLocator: Locator,
   filters: Record<string, TextMatcher>,
   columnCleaner?: Record<string, ColumnTextCleaner>,
-  coloumnMapCache?: ColumnMap | null
+  coloumnMapCache?: columnMap | null
 ): Promise<Locator> {
   const keys = Object.keys(filters);
 
@@ -248,7 +248,7 @@ export async function findRowByFilterSimple(
   let currentColumnMap = coloumnMapCache;
 
   //tối ưuL là lấy index trước, tránh phải tìm lại nhiều lần
-  const columnInfos: ColumnInfo[] = [];
+  const columnInfos: columnInfo[] = [];
 
   for (const key of keys) {
     const result = await getColumnInfoSimple(headersLocator, key, currentColumnMap);
