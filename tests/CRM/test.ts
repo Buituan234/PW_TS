@@ -291,4 +291,214 @@ const chooseSinhTo = xemMenuNao('sinhToBo')
 console.log(chooseSinhTo);
 
 
+// hàm tạo quả BOM. chế tạo bom C4
+
+function taoQuaBom() {
+  console.log(`BUM! BOM NO NGAY LAP TUC`);
+  return 'Xac qua bom';
+}
+
+console.log('CO 2 cach goi');
+
+//eager -> lam ngay
+const caiBombiLoi = taoQuaBom();
+console.log(`Gai xong bom loi, (nhung qua bom da no mat roi)`);
+
+//lazy callback -> lam sau
+
+const caiBomXin = () => taoQuaBom();
+
+console.log(`Gai xong bom xin. Bom chua no`);
+
+caiBomXin();
+
+// trong TS , ham (function) cung goi la 1 kieu du lieu (giong nhu so hoac chuoi), nen minh co the truyen 1 ham
+// vao ben trong 1 ham khac
+//Dinh nghia ham callbak
+const goiDien = () => console.log(`Reng reng! Da giat xong. moi ra lay do`);
+const giaoHang = () => console.log(`Vu vu! Dang giao hang den nha ban`);
+
+function dichVuGiatLa(quanAo: string[], hangDongSauKhiGiat: () => void) {
+  console.log(`Dang giat ${quanAo.join(', ')}`);
+  console.log('....Da giat xong');
+
+  /// 3 Thuc thi callback
+  hangDongSauKhiGiat();
+  //console.log(`Reng reng! Da giat xong. moi ra lay do`);
+}
+
+dichVuGiatLa(['Ao so mi', 'Quan Jean'], goiDien);
+dichVuGiatLa(['Chan bong'], giaoHang);
+
+//chuong trinh may tinh don gian
+// cong, tru, inKetqua
+class MayTinh {
+  ketQua: number;
+  constructor() {
+    this.ketQua = 0;
+  }
+  cong(so: number): this {
+    this.ketQua += so;
+    console.log(`Cong ${so} -> Tong La: ${this.ketQua}`);
+    // <- tra ve chinh cai may tinh do de thuc hien dung tiep
+    return this;
+  }
+
+  tru(so: number): this {
+    this.ketQua -= so;
+    console.log(`Tru ${so} -> Tong La: ${this.ketQua}`);
+    // <- tra ve chinh cai may tinh do de thuc hien dung tiep
+    return this;
+  }
+
+  inKetQua(): void {
+    console.log(`---ket qua cuoi cung la: ${this.ketQua} ----`);
+  }
+}
+
+// su dung
+const calculator = new MayTinh();
+// const ketQua1 = calculator.cong(10);
+// const ketQua2 = calculator.cong(5);
+// const ketQua3 = calculator.tru(1);
+// calculator.inKetQua();
+//method chaining
+calculator.cong(10).cong(5).tru(1).inKetQua();
+
+//vi du di kham benh:
+// 1. Ban (Object): benh nhan la nguoi so huu co the
+//2. Bac si (function ben ngoai): la nguoi can kiem tra co the ban
+//... Mình ko thể tự khám đc cho bản thân. -> phải đến gặp bác sĩ và nói: "Bác sĩ ơi, hãy khám cho tôi (this) đi"
+
+class BenhNhan {
+  constructor(ten, huyetAp) {
+    this.ten = ten;
+    this.huyetAp = huyetAp;
+  }
+  diVaoKham(bacSi) {
+    console.log(`${this.ten} di va kham`);
+    bacSi(this);
+  }
+}
+
+const bacSiHienLanh = (nguoiBenh) => {
+  console.log(`Bac si noi: Cha, huyet ap ${nguoiBenh.huyetAp} la rat khoe`);
+};
+
+const bacSiKhoTinh = (nguoiBenh) => {
+  console.log(`Bac si noi rang: huyet ap ${nguoiBenh.huyetAp} yeu qua, uong thuoc di`);
+  //bac si tac dong nguoc lai benh nhan
+  nguoiBenh.huyetAp += 20;
+  console.log(`Huyet ap da tang len ${nguoiBenh.huyetAp}`);
+};
+
+const ongThuan = new BenhNhan('ongThuan', 90);
+
+ongThuan.diVaoKham(bacSiHienLanh);
+
+ongThuan.diVaoKham(bacSiKhoTinh);
+
+/// DI: cây phụ thuộc
+///// 1. depency flow
+// Bánh Mì trứng -> cần trứng rán -> cần Cái Chảo
+
+// bánh mì trứng là thằng đòi hỏi nhiều nhất -> đứng ở đầu chuỗi
+/// cái chảo -> là thằng độc lâpk nhất -> đứng cuối chuỗi -> và ko cần ai cả
+
+// 2. Chiều 'Ainh sinh ra trước ' (execution flow)
+//thứ tự thực tế khi code chạy từ trong ra ngoài ..
+// 1. cái chảo ra đời trước tiên )tầng đáy
+//2. có chảo rồi -> mới làm đc trứng rán
+//3. có trứng rồi -> mới làm đc bánh mì trứng
+
+//áp dụng vào PW
+
+///1 test case (bánh mì) : cần cái Page
+// page(trứng): cần cái browser Context
+// browser Context: cần cái browser
+// browser (cái chảo) - > cần playuwright server
+
+// -> kết quả khi ấn run test plawright sẽ ầm thầm: bậk server -> bật browser -> tạo context -> mửo page -> rồi mới chạy test
+
+// Phần 1: Các nguyên liệu và món ăn (dependencies) (page)
+class CaiChao {
+  lamNong(): string {
+    console.log(`Dang bat bep lam nong chao`);
+    return 'Chao nong';
+  }
+}
+
+class TrungRan {
+  private chao: CaiChao;
+  constructor(chao: CaiChao) {
+    this.chao = chao;
+  }
+  ran(): string {
+    this.chao.lamNong();
+    console.log(`Dap trung vao chao.... xeo xeo.... chin!`);
+    return 'Mieng trung ran vang uom';
+  }
+}
+
+class BanhMiTrung {
+  private trungRan: TrungRan;
+  constructor(trungRan: TrungRan) {
+    this.trungRan = trungRan;
+  }
+  an(): void {
+    const nhanBanh = this.trungRan.ran();
+    console.log(`Kep ${nhanBanh} vao banh mi. Moi ban an`);
+  }
+}
+
+/// Phần 2: Bộ não (DI Container)
+//chế 1 con robot phục vụ
+
+type FactoryFunction = (r: RobotDauBep) => any;
+
+class RobotDauBep {
+  //map luu tru: key la ten mon, value la ham lam mon an
+  private soTayCongThuc = new Map<string, FactoryFunction>();
+
+  //hành động 1: Học công thức (Register)
+  hocCongThuc(tenMon: string, cachLam: FactoryFunction): void {
+    console.log(`Da hoc cach lam ${tenMon}`);
+    this.soTayCongThuc.set(tenMon, cachLam);
+  }
+
+  //hanh dong 2: Nau mon an (resolve)
+  nauMon<T>(tenMon: string): T {
+    console.log(`Ban goi mon ${tenMon} . Robot dang suy nghi`);
+    const hamLamMon = this.soTayCongThuc.get(tenMon);
+    if (!hamLamMon) {
+      throw new Error(`!Chiu ! Mon ${tenMon} chua duoc day!`);
+    }
+    return hamLamMon(this);
+  }
+}
+
+const robot = new RobotDauBep();
+
+//B2; Day robot hoc cach lam mon an
+robot.hocCongThuc('CaiChao', (r) => new CaiChao());
+
+robot.hocCongThuc('TrungRan', (r) => {
+  const chao = r.nauMon<CaiChao>('CaiChao');
+  return new TrungRan(chao);
+});
+
+robot.hocCongThuc('BanhMiTrung', (r) => {
+  const trungRan = r.nauMon<TrungRan>('TrungRan');
+  return new BanhMiTrung(trungRan);
+});
+
+///B3/// Khach goi mon
+const monAn = robot.nauMon<BanhMiTrung>('BanhMiTrung');
+monAn.an();
+
+// KQ: Robot tạo chảo -> mang chảo về làm trứng -> mang trứng về làm bánh mì -> mang bánh mì ra cho bạn
+
+// khi gọi món bánh mì trứng -> robot sẽ chạy 1 quy trình suy luận cực hay gọi là chain of dependency (chuỗi phụ thuộc)
+
+
 

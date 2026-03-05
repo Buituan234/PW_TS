@@ -1,6 +1,6 @@
 import customers from './customers.json' with { type: 'json' };
 import customersDev from './customers-dev.json' with { type: 'json' };
-import loginCases from './login-cases.json' with { type: 'json' };
+// import loginCases from './login-cases.json' with { type: 'json' };
 
 function loadDataByEnv<T>(base: T, dev: T): T {
   // Lấy environment từ process.env (có sẵn trong Node.js/Playwright)
@@ -24,7 +24,7 @@ type DataEntry = {
 
 export const testDataCatalog = {
   customers: loadDataByEnv(customers, customersDev), //  Tự động load theo môi trường
-  loginCases, // Login cases không cần load theo env
+  // loginCases, // Login cases không cần load theo env
   // orders: loadDataByEnv(orders, ordersDev, ordersUat, ordersProd),
   // products: loadDataByEnv(products, productsDev, productsUat, productsProd),
 } as const;
