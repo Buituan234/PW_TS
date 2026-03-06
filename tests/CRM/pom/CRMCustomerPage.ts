@@ -41,7 +41,8 @@ export class CRMCustomerPage extends BasePage {
         tableHeaders: '#clients thead th',
         tableRows: '#clients tbody tr',
         searchInput: '#clients_filter input[type="search"]',
-        tableProcessing: '#clients_processing'
+        tableProcessing: '#clients_processing',
+        loadingIcon: 'clients_processing'
     } as const
 
     public element = this.createLocatorGetter(this.pageLocators)
