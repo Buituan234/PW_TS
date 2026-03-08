@@ -1,0 +1,41 @@
+thằng POM
+sẽ đảm bảo cái việc là tách biệt trách nhiệm - > trách nhiệm đơn lẻ 
+- phân chia thành 2 thành phần chính
+1. kịch bản test(test script):  đại diện cho business logic
+2. đối tượng trang(page object): đại diện cho technical implenmentation -> tương tác với UI như thế nào
+-> chia thành các class -> mỗi 1 class địa diện cho 1 trang 
+
+--> giải quyết đc 3 cái thách thức lớn nhất trong auto
+1. tính dễ bảo trì: 
+- nó sẽ tập trung tất cả các selector và phương thức của trang custom  bao gồm ví dụ là: company locator
+2. Tính tái sử dụng:
+- tạo ra các phương thức (actions) địa diện cho hành vi nghiệp vụ (business behavior )
+- > ví dụ tao có loginPage.login('user', 'password')
+3. Tính dễ đọc ; 
+
+Để giải quyết vấn đề DRY (don't repeat yourself) => base page( trang cơ sở) 
+basepage -> là 1 lớp cha trừu tượng mà tất cả các page object khác (loginpage), sẽ kế thừa
+=> đóng vai trò như 1 hd giao diện chung. định nghĩa tập hợp các yếu tố và hành động
+mà mọi trang trong ứng dụng dều phải có quyền truy cập
+
+ví dụ: hệ thống nhân viên và công cụ chung
+-> mọi nhân viên đều cần sử dụng chung 1 số công cụ của công ty , ví dụ như là email service
+
+
+
+
+
+// cấu trúc file hệ thống sẽ xây dựng cho bộ fixture của chúng ta
+
+/// chia nhỏ trách nhiệm ra 3 file chính 
+//1. File auth.fixture.ts (tầng 1 và tầng2): chứa logic login và tạo ra "người gác cổng"
+//2. File app.fixture.ts (tầng 3): chứa công thưucs tạo ra các POM (dashboard, customer)
+//3. Fiel gatekeeper.fixture.ts (tổng hành dinh): nơi hợp nhất tất cả lại để sử dụng
+
+cấu trúc chuẩn cho 2 môi trường (dev và stagging)
+.env (1. cấu hình chung - ai cũng giống nhau)
+.env.development (2. cấu hình riêng cho DEV)
+.env.development.local(3. bí mật: chỉ máy bạn có - ko up lên git)
+.env.staging(4. cấu hình cho môi trường stagging)
+
+.. vị trí ở root (thư mục gốc ) ngang hàng với package.json
