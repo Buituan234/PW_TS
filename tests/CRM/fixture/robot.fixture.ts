@@ -16,12 +16,16 @@ export const test = base.extend<{
     // Món này siêu dễ làm không cần nguyên liệu
 
     loiChao: async ({ page }, use) => {
+        // GDD1: 
         await page.goto('http://playwright.dev')
         //1 Chế biến: set up làm trong bếp
         const text = await page.title()
         //2. Đưa món (Bưng ra bàn)
 
         //Robot đưa text cho KH và chờ
+        // GDd2: Chạy tới await use() > Stop > Trao quyền điều khiển sân chơi cho file test
         await use(`Xin chào bạn đang trang ${text}`)
+
+        // GDD3: dù test có chạy pass hay fail => teardowm
     }
 })
