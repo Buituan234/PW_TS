@@ -113,3 +113,29 @@ as (alias)
     npm run test:dev ./tests/env-demo.spec.ts
 
 // Cross sẽ không bắt mình phải đứng ở thư mục chứa file env mà có thể đứng ở bất cứ đâu để chạy 
+
+ //hooks (life cycle)
+
+tứ trụ hooks (life cycle)
+
+
+
+beforeAll (worker) ---> 1 lần duy nhất /file
+
+beforeEach(test) chạy lặp lại mỗi lần trước MỖI test
+
+afterEach(test) . chạy lặp lại mỗi lần sau MỖI test
+
+afterAll(worker) -> 1 lần duy nhất sau khi chạy hết test
+
+woker reuse
+
+// 4 woker - 100 bài test
+
+
+1. woker 1 chạy before all (mở page)
+2. worker 1 chạy Test A(login -> chjuyeern sang dashboard)
+3. worker 1 chưa tắt. nó nhận tiếp Test B
+4. Lúc này before all không chạy lại (vì nó là before all -> Chạy 1 lần cho cả file worker đó)
+5. Test B nhận lại cái sharePage cũ từ A (đang ở Dashboard)
+6. Fail
