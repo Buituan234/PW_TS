@@ -32,6 +32,24 @@ ví dụ: hệ thống nhân viên và công cụ chung
 //2. File app.fixture.ts (tầng 3): chứa công thưucs tạo ra các POM (dashboard, customer)
 //3. Fiel gatekeeper.fixture.ts (tổng hành dinh): nơi hợp nhất tất cả lại để sử dụng
 
+
+// Để hiển thị được 1 trang web khi sử dụng thằng fixture page
+thì thằng PW đi qua 4 tầng kiến tạo
+:::
+
+tầng 1: Browser type (bản vẽ thiết kế)
+== là các biến chromium, firefox, webkit
+== nó nằm im lìm, chưa chạy
+tầng 2: Browser (tòa nhà khách sạn)
+-> Được tạo bằng lệnh launch
+-> Lúc phần mềm chrome (firefox, webkit) => Được bật lên ở trong task manager (Ctrl alt delte)
+Tầng 3: context (Phòng ngủ) - là 1 Browser
+- Được tạo ra bằng new contect
+- nơi cách ly dữ liệu (cookies, session)
+tầng 4: page (cái tivi, điều hòa - page: là cái tab chúng ta đang làm việc)
+- Được tạo ra từ lệnh newPage
+- Nơi thao tác click/fill...
+
 cấu trúc chuẩn cho 2 môi trường (dev và stagging)
 .env (1. cấu hình chung - ai cũng giống nhau)
 .env.development (2. cấu hình riêng cho DEV)
@@ -39,6 +57,18 @@ cấu trúc chuẩn cho 2 môi trường (dev và stagging)
 .env.staging(4. cấu hình cho môi trường stagging)
 
 .. vị trí ở root (thư mục gốc ) ngang hàng với package.json
+
+// Nếu chúng ta có các phòng ngủ khác nhau ví dụ như
+2 phòng 201 và 202
+/// Quy tắc vàng là chuyện gì xảy ra ở phòng 201, ở lại phòng 201
+// Đồ đạc gì ở phòng 201 được khóa kín trong Phòng
+// Pgae - đồ đạc trong phòng: ví dụ có thể bật nhiều tv (Hay nhiều tab - multi tab)
+
+//Tại sao hacker không đăng nhập được phòng 201
+... khi admin đăng nhập 201 -> sever sẽ trả về 1 cái session_id = ..., admin cất vào túi  của adminContext()
+// Khi đó thằng hacker tạo ra từ hackercontext => tạo mới bằng newContext() -> Sẽ là cái túi trống rỗng
+-> Checkin -> Khi hacker vào link dashboard -> sever hỏi: Đưa cái session đây???
+hackerURL: mở túi ra nhưng không có gì cả > sever > Đưa về trang login
 
 thứ tự ưu tiên là
 // biến phục thuộc là NODE_ENV=abc
