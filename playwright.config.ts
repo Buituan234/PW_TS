@@ -1,16 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenvflow from 'dotenv-flow';
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
+if(!process.env.NODE_ENV){
+  process.env.NODE_ENV = 'development'
+}
 
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
+dotenvflow.config({
+  default_node_env: 'development',
+})
+
 export default defineConfig({
   testDir: './tests',
   /* Run tests in files in parallel */
