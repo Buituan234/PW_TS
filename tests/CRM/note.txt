@@ -114,13 +114,13 @@ as (alias)
 
 // Cross sẽ không bắt mình phải đứng ở thư mục chứa file env mà có thể đứng ở bất cứ đâu để chạy 
 
+
+
  //hooks (life cycle)
 
 tứ trụ hooks (life cycle)
 
-
-
-beforeAll (worker) ---> 1 lần duy nhất /file
+beforeAll (worker) ---> 1 lần duy nhất /file cho từng worker
 
 beforeEach(test) chạy lặp lại mỗi lần trước MỖI test
 
@@ -128,14 +128,43 @@ afterEach(test) . chạy lặp lại mỗi lần sau MỖI test
 
 afterAll(worker) -> 1 lần duy nhất sau khi chạy hết test
 
-woker reuse
-
+woker có cơ chế reuse
 // 4 woker - 100 bài test
-
-
 1. woker 1 chạy before all (mở page)
 2. worker 1 chạy Test A(login -> chjuyeern sang dashboard)
 3. worker 1 chưa tắt. nó nhận tiếp Test B
 4. Lúc này before all không chạy lại (vì nó là before all -> Chạy 1 lần cho cả file worker đó)
 5. Test B nhận lại cái sharePage cũ từ A (đang ở Dashboard)
 6. Fail
+
+
+// playwright thực hiện 2 bước
+b1. là khoanh vùng (scoping) = dựng hào rào nơi folder test chúng ta sẽ thực hiện thong qua testDIr
+b2. lập danh sách ứng viên () -> quét hết để lấy fiel theo testMatch
+so với ví dụ checkout.txt -> () đã bị bỏ đi vì ko hoipwj lệ
+-> ket qua la pw tao dc 1 danh sach noi bo gom nhugn file hop le
+
+khi đó chúng ta gõ
+npx playwright test checkout ->
+checkout.spec.ts  
+tests/CRM/checkout.spec.ts 
+so với tests/checkout.spec.ts -> khớp (có chứa chữ checkout)
+/// tests/logintest.spec.ts ->ko khớp -. ko chạy
+
+//cú pháp glob (ko phải regex)
+
+** -> recursive wildcard -> bất kì thư mục nào sâu bao nhiêu cũng được
+
+* -> bất kì tên gì 
+.spec.ts -> extenion đuôi cố định
+**/*.spec.ts => 
+
+projects
+Mục đích 1: tối ưu hóa tài nguyên 
+.. vấn dề 100 TCs APi và 100 TCs UI
+mục đíhc 2: ma trận kiểm thử
+(test matrix)
+
+mục đích 3: Điều phối luồng chạy *orchestration
+có thể có cấu hình Setup trạng thái đăng nhập -> chạy test -> tear down
+thiết lập sự phụ thuộc vàoi giữa các file test
