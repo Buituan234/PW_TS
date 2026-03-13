@@ -1,8 +1,8 @@
 import { test, expect, Page, chromium } from '@playwright/test';
 
-//rất hay dùng của các bạn hay xài selenium
+// rất hay dùng của các bạn hay xài selenium
 
-//Khai báo biến toàn cục
+// Khai báo biến toàn cục
 // let page: Page;
 
 // test.beforeAll(async () => {
@@ -66,6 +66,8 @@ import { test, expect, Page, chromium } from '@playwright/test';
 //   expect(theme).toBeNull();
 // });
 
+
+// Ví dụ 2
 let sharedPage: Page;
 
 //BAD PRACTICE
