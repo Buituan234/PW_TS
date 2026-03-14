@@ -168,3 +168,76 @@ mục đíhc 2: ma trận kiểm thử
 mục đích 3: Điều phối luồng chạy *orchestration
 có thể có cấu hình Setup trạng thái đăng nhập -> chạy test -> tear down
 thiết lập sự phụ thuộc vàoi giữa các file test
+
+Đặc tính của project -> kế thừa và ghji đè
+
+///1 Ưu tiên 1: câuis hình trong từng fiel test 
+
+//ưu tiên 2: cấu hình trong trong project
+
+//ưu tiên 3" cấu hình trong global
+
+
+cái riêng PROJECT CONFIG SẼ GHI ĐÈ CÁI CHUNG TOP LEVEL CONFIG ->
+
+
+global config ()
+
+
+-- chay project them arugment 
+
+--project=name
+
+
+
+
+
+
+                chrome  firefox iphone12
+
+    headless    Y           Y       Y    
+    slow:       N           Y       N
+    Video:       Y          N       N   
+
+
+
+- Quy trình sàng lọc nhiều project
+=> lớp 1 quét từ testDir
+nhiệm vụ là tìm tất cả file có thể test dựa vào testDir
+lúc này chưa quan tâm tới project nào cả
+
+lớp 2 ghép cặp dự án
+
+== đem từng file ở lớp 1 - .ướp vàop từng project
+- logic
+- ->  
+
+
+kết quả của lớp 2 (danh sách công việc tiềm năng)
+npx playwright test[]
+1. Job A. spec.ts chạy trên project API (api.spec1.ts)
+2. Job B chạy trên desktop (cart.spec1.ts)
+3. Job C chạy trên desktop (login.spec1.ts)
+4. Job D chạy trên mobile (cart.spec1.ts)
+5. Job E. chạy trên mobile (login.spec1.ts)
+
+
+
+lớp 3 bộ lọc CLI (user filter) -> lọc lại danh sách 5 jobs trên dựa ctreen những gì đã gõ
+npx playwright test (filter)
+
+1. là filter theo tên file test login
+
+dấu "/" biểu thị cho folder
+2. tìm theo folder
+npx playwright test ui/
+3. tìm theo project
+ --project 
+npx playwright test login --project=mobile-ios           
+npx playwright test cart --project=mobile-ios           
+PW taoh ra cac JOB dua tren FIle + project
+
+
+GLOBAL Setup (sáng sớm): làm duy nhất 1 lần
+Tests(trong ngày): 
+GLOBAL TEARDOWN(đêm muộn): làm duy nhát 1 lần
