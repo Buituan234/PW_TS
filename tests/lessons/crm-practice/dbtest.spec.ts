@@ -1,4 +1,4 @@
-import {test } from './fixture/database.fixture'
+import {test } from '../../../CRM/fixture/database.fixture'
 import { expect } from '@playwright/test'
 
 // File test là độc lập với nhau tránh sự phụ thuộc
