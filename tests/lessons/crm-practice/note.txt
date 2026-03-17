@@ -241,3 +241,70 @@ PW taoh ra cac JOB dua tren FIle + project
 GLOBAL Setup (sáng sớm): làm duy nhất 1 lần
 Tests(trong ngày): 
 GLOBAL TEARDOWN(đêm muộn): làm duy nhát 1 lần
+
+//cơ chế storageState -> lưu đc trạng thái đăng nhập của tài khoản và dùng cho các test case tiếp theo
+
+
+// có 2 cơ chế đăng nhập
+1.. cookie -based (sesion)
+stateful -> server phải lưu thông tin sessionID trong rAm/db => 1 phiên đăng nhập của người dùng
+browser tự động lưu vào cookie 
+sau đó browser tựk động gửi kèm mỗi request -
+
+2... token -based(jwt) ->  
+stateless -> server ko lưu trữu gì cả, thông tin nằm hết ở trong token
+-client (Fe) sẽ có clogic để lưu vào local storage (hoặc cookie)
+- client phải tự code để gắn vào header (FE) => mỗi 1 request phải có Authorization: Bearer........
+
+
+//TestInfo
+Quy trình làm việc của PW
+B1: Gõ npx playwright test ...
+B2: Tổng hợp, đọc config, đọc file test (parsed file test)
+B3: Phân công: gọi worker (nhân viên làm việc hay là os process)
+B4: Tạo hồ sơ: Runner tạo ra 1 cái object gọi là testInfo, điền hết tất cả thông tin
+title:
+project:
+worker:
+retry...
+B5: Injection > Cho vào tham số thứ 2 của hàm test ({page, fixtureA, fixtureB}, testInfo)
+
+Nhóm chức năng của testInfo
+- Lấy thông tin (read only)
+title > tên bài test
+project.name: tên project
+file _.: Đường dẫn file
+retry: số lần chạy lại
+status: Trạng thái của file test thường dùng ở afterEach
+duration: Thời gian chạn, cũng thường dùng ở afterEach
+
+Nhóm chức năng: Điều khiển luồng 
+testInfo.skip(): bỏ qua file test, tương tự với test.skip
+testInfo.setTimeout()
+testInfo.fail()
+
+Nhoms chức năng: Báo cáo
+testInfo.attach()
+testInfo.annotations(note )
+
+lấy thông tin ở file test/ config.ts/ khi test chạy (lấy đươc duration, status)
+
+So sánh phạm vi của test và testInfo
+- Phạm vi global: tồn tại test - phạm vi toàn bộ file test, chưa tồn tại testInfo
+VD: Nếu dùng test.skip thì sẽ skip tất cả các test case bên dưới dòng test.skip
+- Phạm vi group: tồn tại test - phạm vi toàn bộ phần test.description, chưa tồn tại testInfo
+VD: Nếu dùng test.skip thì sẽ skip toàn bộ số test case bên trong test.description và ở phía dưới của test.skip
+- Phạm vi function(trong test case): Tồn tại cả test và testInfo nhưng khuyến khích dùng test Info trong function hơn
+
+Quy tắc ghi đề khi sử dụng test và testInfo ở nhóm chức năng điều khiển luồng
+> Càng vào sâu (Scope hẹp hơn) thì quyền lực cao hơn và nó sẽ ghi đè lại những chỗ đã được khai báo bên ngoài
+
+TAGS #
+Để chạy ta dùng: --grep "@tag" hoặc -g "@tag"
+Còn khi ta dùng: --grep-invert "@tag" là sẽ chạy tất cả các case ngoại trừ case có tag đã điền
+
+Sử dụng hoặc (OR)
+-- grep "@tag1|@tag2": chỉ chạy các test có tag 1 hoặc tag 2
+
+Ngoài cách sử dụng tag để chạy 1 test case trong file thì ta có thể dùng: --grep "text" (trong đó text là phần text trong tên file test)
+Bởi vậy khi đặt tên file test: test('TC01 - Đăng nhập',async()=> {}) thì cần thêm số thứ tự test case vào tên để có thể dễ dàng Chạy
