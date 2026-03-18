@@ -308,3 +308,32 @@ Sử dụng hoặc (OR)
 
 Ngoài cách sử dụng tag để chạy 1 test case trong file thì ta có thể dùng: --grep "text" (trong đó text là phần text trong tên file test)
 Bởi vậy khi đặt tên file test: test('TC01 - Đăng nhập',async()=> {}) thì cần thêm số thứ tự test case vào tên để có thể dễ dàng Chạy
+
+Có 3 giai đoạn khi mà chúng ta gõ npx playwright test ...
+Giai đoạn 1: Main process (Quét file)
+- Đăng kus các file test (ghi danh)
+- Ở đây main process ko chạy hàm async({page})
+- Sau khi đọc hết xong > có 1 danh sách tổng > ghi lại là trong này có 1 bài test là test A > Dòng số 10 
+- Tiếp đó dựa theo filter mà chúng ta đưa cho --grep,(tag), tên file...folder
+- Nó sẽ tính toán cần bao nhiêu worker (Cái này phụ thuộc vào setup của người dùng hoặc default: Tự tính toán)
+và chia việc
+
+GD2: Thằng worker làm việc
+Main process không gửi code mà gửi mệnh lệnh cho kênh IPC (Inter Process Communication): Mày hãy chạy file này ở đây cho tôi
+Giao tiếp giữa Main process và woker process là qua dạng string/text thôi chứ không phải dạng hàm nên không thể gửi code qua dc
+
+GD3: Woker process - người thợ ---
+Khởi động, nó như 1 tờ giấy trắng nó nhận lệnh và bắt đầu làm việc
++ Load lại file (re-evaluation)
++ và check lại với file test mệnh lệnh từ main process -> nếu đúng thì nhảy vào cái ruột body
++ nếu sai skip luôn
+
+Data-driven: 
+Có 1 bộ data -> Mình sẽ chạy hết các info trong bộ data đó với 1 test case
+- Giá trị biên/ min /max / length  .... mỗi 1 case này > có 1 bộ dữ liệu để test
+- Nếu viết file test thông thường thì ta sẽ phải viết bằng ấy file test tương ứng với n số dữ liệu
+- Dùng 1 bộ test > sử dụng vòng lặp chạy qua các dữ liệu và chạy vào file test
+
+Nguyên tắc vàng:
+Dữ liệu dùng để ssync test (Parameter) phải là dữ liệu tĩnh (static), hoặc đồng bộ tại thời điển chạy lệnh
+Bởi vì có 2 lần chạy của main process và worker process: nên cần đàm bảo sự tĩnh của giá trị
