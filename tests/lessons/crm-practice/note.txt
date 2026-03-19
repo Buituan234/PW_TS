@@ -337,3 +337,126 @@ Có 1 bộ data -> Mình sẽ chạy hết các info trong bộ data đó với 
 Nguyên tắc vàng:
 Dữ liệu dùng để ssync test (Parameter) phải là dữ liệu tĩnh (static), hoặc đồng bộ tại thời điển chạy lệnh
 Bởi vì có 2 lần chạy của main process và worker process: nên cần đàm bảo sự tĩnh của giá trị
+
+
+Chạy parallel (song song) sẽ giúp tốc độ nhanh gấp N lần 
+
++ Hệ thống nhà hàng
+Main process: Quản lý nhà hàng
+Worker process: là đầu bếp
+File test (.spec.ts): là sách công thức
+
+1. Quy tắc sắp xếp file (thực đơn từ a-z)
+ví dụ file nào có bắt đầu bằng chữ A sẽ sắp xếp trên cùng ưu tiên nhất > z
+theo thứ tự alphabet
+ví dụ ở hệ thống nhà hàng có 3 file
+01_A.spec.ts (món khai vị) - xếp đầu tiên
+02_B.spec.ts (món bò) - xếp thứ 2
+03_C.spec.ts (món bánh) - xếp cuối cùng
+
+2. Cơ chế phân chia worker (Ai nhanh hưởng nhiều)
+ví dụ ta có 2 đầu bếp: worker1 và worker2
+
+Cảnh 1: Phân chia ban đầu
+-> 2 đầu bếp tới bảng công việc
+- woker1 nhanh tay > món khai vị
+- woker2 > giật từ món bò (trong trường hợp này thì worker nào giật nhanh hơn thì sẽ hiển thị trước ra màn hình
+chứ không nhất thiết là sẽ chạy file 01 trước)
+
+Cảnh 2: Chênh lệch tốc độ
+- Đầu bếp 1: woker 1 thấy món khai vị làm rất nhanh -> vèo cái làm xong 2 phút
+woker2: làm món bò lâu hơn mất 5p
+
+Cảnh 3: Quay lại hàng chờ (queue)
+- Woker1 lấy món bánh để làm
+
+=> Cuối cùng
+worker1: món 1+3
+worker2: món 2
+
+01_fast.spec.ts
+02_slow.spec.ts
+03_fast.spec.ts
+04_fast.spec.ts
+2 worker
+🚀 [Worker 2] BẮT ĐẦU: 02_slow.spec.ts
+[chromium] › tests\lessons\parallel\01_fast.spec.ts:3:1 › Test 01 (Nhanh)
+🚀 [Worker 1] BẮT ĐẦU: 01_fast.spec.ts
+✅ [Worker 1] KẾT THÚC: 01_fast.spec.ts
+[chromium] › tests\lessons\parallel\03_fast.spec.ts:3:1 › Test 03 (Nhanh)
+🚀 [Worker 1] BẮT ĐẦU: 03_fast.spec.ts
+✅ [Worker 1] KẾT THÚC: 03_slow.spec.ts
+[chromium] › tests\lessons\parallel\04_fast.spec.ts:3:1 › Test 04 (Nhanh)
+🚀 [Worker 1] BẮT ĐẦU: 04_fast.spec.ts
+✅ [Worker 1] KẾT THÚC: 04_slow.spec.ts
+[chromium] › tests\lessons\parallel\02_slow.spec.ts:3:1 › Test 02 (Siêu chậm)
+✅ [Worker 2] KẾT THÚC: 02_slow.spec.ts
+
+có 2 cấp độ 1 là cấp độ file test 
+2 là cấp độ test case ở trong file Test
+
+A
+B
+C
+D
+E
+
+🔵 [Worker 2] ▶️ Bắt đầu làm Món B
+[chromium] › tests\lessons\parallel\02_slow.spec.ts:4:3 › Bộ Test Nặng Ký (5 món) › Món A
+🔴 [Worker 1] ▶️ Bắt đầu làm Món A
+🔴 [Worker 1] ✅ Xong Món A
+[chromium] › tests\lessons\parallel\02_slow.spec.ts:10:3 › Bộ Test Nặng Ký (5 món) › Món B
+🔵 [Worker 2] ✅ Xong Món B
+[chromium] › tests\lessons\parallel\02_slow.spec.ts:16:3 › Bộ Test Nặng Ký (5 món) › Món C
+🟢 [Worker 2] ▶️ Bắt đầu làm Món C
+[chromium] › tests\lessons\parallel\02_slow.spec.ts:22:3 › Bộ Test Nặng Ký (5 món) › Món D
+🟠 [Worker 1] ▶️ Bắt đầu làm Món D
+[chromium] › tests\lessons\parallel\02_slow.spec.ts:16:3 › Bộ Test Nặng Ký (5 món) › Món C
+🟢 [Worker 2] ✅ Xong Món C
+[chromium] › tests\lessons\parallel\02_slow.spec.ts:22:3 › Bộ Test Nặng Ký (5 món) › Món D                                                                                     
+🟠 [Worker 1] ✅ Xong Món D
+[chromium] › tests\lessons\parallel\02_slow.spec.ts:28:3 › Bộ Test Nặng Ký (5 món) › Món E                                                                                     
+🟣 [Worker 1] ▶️ Bắt đầu làm Món E
+🟣 [Worker 1] ✅ Xong Món E
+
+Nếu trong trường hợp nhiều file test spec.ts và trong các file test có nhiều test case
+Thì main process sẽ trải tất cả các file tets và các tets case ra và chạy từ trên xuống (nhưng thứ tự bắt đầu có thể không đồng nhất)
+01_fast.spec.ts
+02_slow.spec.ts - Món A
+02_slow.spec.ts - Món B
+02_slow.spec.ts - Món C
+02_slow.spec.ts - Món D
+02_slow.spec.ts - Món E
+03_fast.spec.ts 
+04_fast.spec.ts
+
+🔴 [Worker 2] ▶️ Bắt đầu làm Món A
+[chromium] › tests\lessons\parallel\01_fast.spec.ts:3:1 › Test 01 (Nhanh)
+🚀 [Worker 1] BẮT ĐẦU: 01_fast.spec.ts
+[chromium] › tests\lessons\parallel\02_slow.spec.ts:4:3 › Bộ Test Nặng Ký (5 món) › Món A
+🔴 [Worker 2] ✅ Xong Món A
+[chromium] › tests\lessons\parallel\02_slow.spec.ts:10:3 › Bộ Test Nặng Ký (5 món) › Món B
+🔵 [Worker 2] ▶️ Bắt đầu làm Món B
+[chromium] › tests\lessons\parallel\01_fast.spec.ts:3:1 › Test 01 (Nhanh)
+✅ [Worker 1] KẾT THÚC: 01_fast.spec.ts
+[chromium] › tests\lessons\parallel\02_slow.spec.ts:16:3 › Bộ Test Nặng Ký (5 món) › Món C
+🟢 [Worker 1] ▶️ Bắt đầu làm Món C
+[chromium] › tests\lessons\parallel\02_slow.spec.ts:10:3 › Bộ Test Nặng Ký (5 món) › Món B
+🔵 [Worker 2] ✅ Xong Món B
+[chromium] › tests\lessons\parallel\02_slow.spec.ts:22:3 › Bộ Test Nặng Ký (5 món) › Món D                                                                                     
+🟠 [Worker 2] ▶️ Bắt đầu làm Món D
+[chromium] › tests\lessons\parallel\02_slow.spec.ts:16:3 › Bộ Test Nặng Ký (5 món) › Món C
+🟢 [Worker 1] ✅ Xong Món C
+[chromium] › tests\lessons\parallel\02_slow.spec.ts:28:3 › Bộ Test Nặng Ký (5 món) › Món E                                                                                     
+🟣 [Worker 1] ▶️ Bắt đầu làm Món E
+🟣 [Worker 1] ✅ Xong Món E
+[chromium] › tests\lessons\parallel\02_slow.spec.ts:22:3 › Bộ Test Nặng Ký (5 món) › Món D                                                                                     
+🟠 [Worker 2] ✅ Xong Món D
+[chromium] › tests\lessons\parallel\03_fast.spec.ts:3:1 › Test 03 (Nhanh)
+🚀 [Worker 1] BẮT ĐẦU: 03_fast.spec.ts
+[chromium] › tests\lessons\parallel\04_fast.spec.ts:3:1 › Test 04 (Nhanh)                                                                                                      
+🚀 [Worker 2] BẮT ĐẦU: 04_fast.spec.ts
+[chromium] › tests\lessons\parallel\03_fast.spec.ts:3:1 › Test 03 (Nhanh)
+✅ [Worker 1] KẾT THÚC: 03_slow.spec.ts
+[chromium] › tests\lessons\parallel\04_fast.spec.ts:3:1 › Test 04 (Nhanh)                                                                                                      
+✅ [Worker 2] KẾT THÚC: 04_slow.spec.ts

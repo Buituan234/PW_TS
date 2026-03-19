@@ -1,10 +1,10 @@
 import { test, expect, Page } from '@playwright/test'
-import { CRMLoginPage } from '../pom/CRMLoginPage'
-import { CRMDashboardPage } from '../pom/CRMDashboardPage';
-import { CRMCustomerPage } from '../pom/CRMCustomerPage';
-import { CRMNewCustomerPage } from '../pom/CRMNewCustomerPage';
-import { createMinimalCustomerInfo } from '../utils/test-data'
-import { getTestDataSimple } from '../../lessons/crm-practice/data-practice';
+import { CRMLoginPage } from './pom/CRMLoginPage'
+import { CRMDashboardPage } from './pom/CRMDashboardPage';
+import { CRMCustomerPage } from './pom/CRMCustomerPage';
+import { CRMNewCustomerPage } from './pom/CRMNewCustomerPage';
+import { createMinimalCustomerInfo } from './utils/test-data'
+import { getTestDataSimple } from './test-data/index';
 
 test.beforeEach(async ({page}) => {
     const loginPage = new CRMLoginPage(page);
