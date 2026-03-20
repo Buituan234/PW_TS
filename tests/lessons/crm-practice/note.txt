@@ -460,3 +460,48 @@ Thì main process sẽ trải tất cả các file tets và các tets case ra v�
 ✅ [Worker 1] KẾT THÚC: 03_slow.spec.ts
 [chromium] › tests\lessons\parallel\04_fast.spec.ts:3:1 › Test 04 (Nhanh)                                                                                                      
 ✅ [Worker 2] KẾT THÚC: 04_slow.spec.ts
+
+//TRACE VIEW
+
+là tập hợp các SNAPSHOT DOM 
+
+Flaky Test  -> Test chập chờn
+
+
+khi mà deploy code lên PROD => ở 1 số cty hiện đại và có quy trình chuẩn -> trigger Automation test (pipeline)
+với bộ TCs regression test liên quan tới CR golive đó. -> nếu mà chạy regress fail -> deploy bị block và ko đc chạy nữa
+-> đội BE/FE phải chờ ngồi chạy lại 10 -15p quá trình deploy lại. 
+
+cơ chế "Tự chữa lành" tạm thời để hệ thống vận hành trơn tru: On first retry
+
+
+ALure Report
+
+import type {
+  FullConfig, FullResult, Reporter, Suite, TestCase, TestResult
+} from '@playwright/test/reporter';
+
+class MyReporter implements Reporter {
+    ///Playwright test bawtsa dadafu chạy  khởi tạo biến đếm (pass =0, fail =0) (before all)
+  onBegin(config: FullConfig, suite: Suite) {
+    console.log(`Starting the run with ${suite.allTests().length} tests`);
+  }
+
+  //Bắt đầu 1 file test  (before each)
+  onTestBegin(test: TestCase, result: TestResult) {
+    console.log(`Starting test ${test.title}`);
+  }
+
+
+    //afterEach (chạy sau khi file test kết thúc) (nếu test fail => gửi noti qua Msteam......)
+  onTestEnd(test: TestCase, result: TestResult) {
+    console.log(`Finished test ${test.title}: ${result.status}`);
+  }
+
+  // afterALl (chạy hết bài test)=> tính tổng bn test case pass fai. gửi báo ccáo. slack/email
+  onEnd(result: FullResult) {
+    console.log(`Finished the run: ${result.status}`);
+  }
+}
+
+export default MyReporter;

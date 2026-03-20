@@ -61,7 +61,7 @@ const allKeys = Object.keys(loginCases) as LoginCaseKey[];
 // Ví dụ với key = 'emptyEmail':
 //   loginCases['emptyEmail'].data.expectedResult → 'error'   → BỎ QUA
 const positiveKeys = allKeys.filter((key) => loginCases[key].data.expectedResult === 'success');
-const negativeKeys = allKeys.filter((key) => loginCases[key].data.expectedResult === 'error');
+const negativeKeys = allKeys.filter(key => loginCases[key].data.expectedResult === 'error');
 
 console.log(`   👉 Found ${positiveKeys.length} positive cases.`);
 console.log(`   👉 Found ${negativeKeys.length} negative cases.`);

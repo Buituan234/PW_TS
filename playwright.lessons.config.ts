@@ -18,7 +18,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 1,
   workers: process.env.CI ? 1 : 2,
   reporter: [
-    // ['allure-playwright'],
+    ['allure-playwright'],
     // ['./custom.ts'],
     // [
     //   'json',
@@ -26,18 +26,18 @@ export default defineConfig({
     //     outputFile: './data.json',
     //   },
     // ],
-    [
-      'list',
-      {
-        printSteps: true,
-      },
-    ],
-    ['html'],
+    // [
+    //   'list',
+    //   {
+    //     printSteps: true,
+    //   },
+    // ],
+    // ['html'],
   ],
 
   use: {
     baseURL: 'https://crm.anhtester.com',
-    trace: 'on',
+    trace: 'on-first-retry',
     headless: false,
     video: 'on-first-retry',
     screenshot: 'off',

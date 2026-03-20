@@ -72,7 +72,7 @@ const TEST_CASES = [
     expectedError: 'Epic sadface: Username is required',
   },
 ];
-//data provider
+// data provider
 // []
 // ============================================================
 // 2️⃣ SINH TEST TỰ ĐỘNG (PARAMETERIZED)
