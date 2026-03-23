@@ -58,18 +58,22 @@ if (Test-Path $HistoryFile) {
     # URL relative từ server root
     $ReportUrl = "http://localhost:$ServerPort/$Timestamp"
     
-    $lines = @(Get-Content $HistoryFile -Encoding UTF8 | Where-Object { $_.Trim() -ne "" })
+    # Đọc file và loại bỏ BOM nếu có
+    $rawContent = [System.IO.File]::ReadAllText((Resolve-Path $HistoryFile).Path)
+    $rawContent = $rawContent.TrimStart([char]0xFEFF)
+    $lines = @($rawContent -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" })
     
     if ($lines.Count -gt 0) {
         $lastLine = $lines[-1]
-        if ($lastLine -is [string]) { $lastLine = $lastLine.Trim() }
         
         try {
             if ($lastLine.StartsWith("{") -and $lastLine.EndsWith("}")) {
                 $entry = $lastLine | ConvertFrom-Json
                 $entry.url = $ReportUrl
                 $lines[-1] = ($entry | ConvertTo-Json -Compress -Depth 10)
-                $lines | Out-File $HistoryFile -Encoding UTF8 -Force
+                # Ghi file UTF8 KHÔNG BOM
+                $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+                [System.IO.File]::WriteAllLines((Resolve-Path $HistoryFile).Path, $lines, $utf8NoBom)
                 Write-Host "History patched! URL: $ReportUrl" -ForegroundColor Green
             }
         } catch {
