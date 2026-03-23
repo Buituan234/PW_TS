@@ -505,3 +505,12 @@ class MyReporter implements Reporter {
 }
 
 export default MyReporter;
+
+ALLURE REPORT  -> có thể lưu history rất nhiều lần chạy
+
+npx playwright test trace --config playwright.lessons.config.ts 
+
+./scripts/allure-history.sh 
+powershell -ExecutionPolicy Bypass -File ./scripts/allure-history.ps1
+
+allure open ./allure-report
