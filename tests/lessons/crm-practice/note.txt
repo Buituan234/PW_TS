@@ -514,3 +514,134 @@ npx playwright test trace --config playwright.lessons.config.ts
 powershell -ExecutionPolicy Bypass -File ./scripts/allure-history.ps1
 
 allure open ./allure-report
+
+API = Application Programming Interface
+Application: là giống các phần mềm Facebook. zép lào, 
+programming: alf cách chúng đc viết ra bằng code
+interface -> nó là nơi gặp gỡ, cầu nói để 2 thằng xa lạ nói chuyện được với nhau
+
+
+Bạn (FE): ngồi ở bàn ăn.. Mình muốn ăn bánh mì pate
+
+Nhà bếp: (BE): là nơi chứa thị bò, gia vvị. đầu bếp
+
+Vấn đề: cần 1 thằng bồi bàn API
+
+Bồi bàn (API) sẽ làm các việc
++B1 ( Request):: Đưau thực đơn cho bồi bàn (cho tôi 1 bánh mì pate kèm dưa chuột)
++B2 Process: bồi bàn mang tờ giấy đó dưua cho đầu bếp
++B3 Response : bếp nấu xong., bồi bàn đưa đĩa chứa bánh mì pate cho bạn 
+
+
+Hiện nay có những công nghệ nào để thằng API trổ tài, 
+
+1. Là Restful API: thay thế (SOAP API)
+Ví dụ: Mình đang đứng trước 1 cái máy bán nước tự động (BE)
+-. Trên máy có các nút A(coca), B)(pepsi) => đây là chính là endpoint (/coca, /pepsi)
+-> ví dụ muốn uống coca -> ấn nút A -> máy nhả ra 1 lon coca
+=> vấn đề với chuẩn resful API:
+= Thừa mức: nhả ra lon 330ml => uống có 1 ngụm ném đi -> phí phạm (tốn băng thông)
+- mất công: coca + bimbim => nhấn 2 lần . 1 lần là A -> 1 lần C (bimbim) -=> thao tác 2 lần gửi 2 request
+
+2. Do phở bò phát triển -> GraphQL 
+Bối cảnh: Mình vào 1 quán bar xịn xò, gặp anh bartender (BE)
+- Cách hoạt động:
+- Bartender ko đưa menu cố định., => đưa cho 1 tờ giấy trắng và 1 cái bút
+-> mình viết yêu cầuL cho 1 ly cocktail: 30% rượu rum, 50% nc cam, 2 lát chanh, KO đường
+
+-> Bartender pha chế y hệt công thức đó và đưua cho 1 ly duy nhất
+Ưu điểm: 
+Chính xác: -> yêu cầu gì đc nấy. ko thừa đường, thiếu chanh
+-. tiện lợi,. nếu thêm 1 địa lạc, -=> thêm vào tờ giấy -=> anh bartender sẽ mang ra Trong 1 request
+
+
+3. Websocket: 
+- Bối cảnh: ví dụ cần bơm đầy bể bơi
+-= cách hoạt động: ko dùng thau chậu -> nối 1 cái ống dẫn nước (socket connection) tahwngr từ nhà máy nc 
+vào cái bể -> nc chảy liên tục (data stream) -<> hễ nhà máy bơm nc thì cái bể nhận đc ngay nước tức thì
+ứng dụng: coin, chứng, giá vàng.
+độ trễ thấp
+
+playwright cơ chế của nó là websocket -> giao tiếp trực tiếp với browser
+
+mỗi cty có 1 ông SA 
+
+
+
+tiếp theo
+thì để 2 thằng giao tiếp với nhau qua cây cầu API thì phải có ngôn ngữ chung 
+
+ví dụ FE( là người việt nam) (code bằng type script)
+BE là người Mỹ tho (code = Java/python)
+
+thì để dùng API nói chuyện với 2 ông này thì cần 1 ngôn ngữ chung -. JSON (javascript object notation)
+
+cấu trúc JSON rất đơn giản y xì object của typescript
+
+{
+  "ten": "teo",
+  "tuoi": 25
+}
+
+{
+  'ten':"teo"
+} > sai
+
+SPA 
+server side rendering
+client side rendering 
+
+Thông tin 1 request mà FE gọi xuống BE
+
+1. Method (hành động muốn làm)
+- GET: lấy thông tin (Không sửa đổi gì). Ví dụ: Xem danh sách sản phẩm
+- POST: Tạo mới: ví dụ: Đăng kí tài khoản
+- PUT/ Patch: sửa đổi: VÍ dụ: Đổi mật khẩu, cập nhật profile
+- DELETE: xóa: Ví dụ xóa giỏ hàng
+
+CURD:> Create- update - read -DELETE
+
+2. endpoint (địa chỉ)
+BaseUrl: https://jsonplaceholder.typicode.com
+endpoint: /todos/1
+
+3 Header (thông tin phụ)
+- Content-type: application/json (Báo trước: trong thư viết bằng json)
+- Authorization: xác thức và phan quyền (cơ chế JWT)
+
+4 Body 
+Chỉ dùng cho POST/PUT/Patch
+
+sử dụng curl > giống như 1 gói tin nén chứa đầy đủ URL, endpoint, method, header,body, ... trong 1 đoạn văn bản duy nhất 
+
+Thông tin response phẩn hồi
+1 Status code mã trạng thái - cực kì quan trọng
+2xx: Thành công 
+200: ok ổn áp
+201: Created: tạo mới thành công (POST)
+
+3xx
+redirect - chuyển hướng
+
+4xx (lỗi)
+400 bad request: Gửi dữ liệu sai format
+401 Unauthorized: chưa đăng nhập
+403: forbiden: đăng nhập rồi nhưng không có quyền
+404: Not found: sai địa chỉ ( thường sai endpoint)
+
+5xx (lỗi server)
+500 Internal server error
+502 Timeout
+
+2. Response body
+dữ liệu trả về thường là Json để FE lấy ra hiển thị trên màn hình
+
+AUTHENTICATION VÀ AUTHORIZATION  và cơ chế JWT
+
+authen: xác thực bạn là ai (401)
+
+author: bạn được làm gì? (403)
+
+route 
+/admin/dashboard 
+/guest/dashboad
