@@ -18,7 +18,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 1,
   workers: process.env.CI ? 1 : 2,
   reporter: [
-    ['allure-playwright'],
+    // ['allure-playwright'],
     // ['./custom.ts'],
     // [
     //   'json',
@@ -26,12 +26,12 @@ export default defineConfig({
     //     outputFile: './data.json',
     //   },
     // ],
-    // [
-    //   'list',
-    //   {
-    //     printSteps: true,
-    //   },
-    // ],
+    [
+      'list',
+      {
+        printSteps: true,
+      },
+    ],
     // ['html'],
   ],
 
@@ -62,14 +62,14 @@ export default defineConfig({
       },
       dependencies: ['setup'],
     },
-    // {
-    //   name: 'api',
-    //   use: {
-    //     browserName: undefined,
-    //     baseURL: 'https://jsonplaceholder.typicode.com',
-    //   },
-    //   testMatch: '/api/**/*.spec.ts',
-    // },
+    {
+      name: 'api',
+      use: {
+        browserName: undefined,
+        baseURL: 'https://jsonplaceholder.typicode.com',
+      },
+      testMatch: '/api/**/*.spec.ts',
+    },
     // {
     //   name: 'neko-setup',
     //   use: {
