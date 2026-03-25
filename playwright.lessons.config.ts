@@ -66,7 +66,8 @@ export default defineConfig({
       name: 'api',
       use: {
         browserName: undefined,
-        baseURL: 'https://jsonplaceholder.typicode.com',
+        //baseURL: 'https://jsonplaceholder.typicode.com',
+        baseURL: 'https://api-neko-coffee.autoneko.com'
       },
       testMatch: '/api/**/*.spec.ts',
     },
