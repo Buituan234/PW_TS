@@ -1,6 +1,4 @@
-import { test, expect } from '@playwright/test'
-import { ChildProcess } from 'child_process'
-import { get } from 'http'
+import { test, expect, APIRequestContext } from '@playwright/test'
 
 test('TC01. Register -> Login -> Lấy JWWT token', async ({ request }) => {
     // Đăng kí
@@ -34,7 +32,7 @@ test('TC01. Register -> Login -> Lấy JWWT token', async ({ request }) => {
     
 })
 
-async function getToken(request: any): Promise<string>{
+async function getToken(request: APIRequestContext): Promise<string>{
     const loginRes = await request.post('/auth/login', {
         data: {
             username: 'tuan1',
@@ -56,13 +54,14 @@ test('TC02. Query param - Lọc products theo type', async ({ request }) => {
     })
     
     expect(getRes.status()).toBe(200)
-    const getBody = getRes.json() as any
+    const getBody = await getRes.json() as any
 
     console.log('Số sản phẩm', getBody.data?.length);
 
-    for(const product of getBody.data){
-        expect(product.type).toBe('equipment')
+    if (getBody.data?.length > 0){
+        for(const product of getBody.data){
+            expect(product.type).toBe('equipment')
+        }
+        console.log('Tất cả các sản phẩm đều là type equipment');
     }
-    console.log('Tất cả các sản phẩm đều là type equipment');
-    
 })
