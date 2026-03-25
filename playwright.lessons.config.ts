@@ -27,13 +27,13 @@ export default defineConfig({
     //     outputFile: './data.json',
     //   },
     // ],
-    // [
-    //   'list',
-    //   {
-    //     printSteps: true,
-    //   },
-    // ],
-    ['html'],
+    [
+      'list',
+      {
+        printSteps: true,
+      },
+    ],
+    // ['html'],
   ],
 
   use: {
@@ -63,14 +63,15 @@ export default defineConfig({
       },
       dependencies: ['setup'],
     },
-    // {
-    //   name: 'api',
-    //   use: {
-    //     browserName: undefined,
-    //     baseURL: 'https://jsonplaceholder.typicode.com',
-    //   },
-    //   testMatch: '/api/**/*.spec.ts',
-    // },
+    {
+      name: 'api',
+      use: {
+        browserName: undefined,
+        //baseURL: 'https://jsonplaceholder.typicode.com',
+        baseURL: 'https://api-neko-coffee.autoneko.com'
+      },
+      testMatch: '/api/**/*.spec.ts',
+    },
     // {
     //   name: 'neko-setup',
     //   use: {
