@@ -1,5 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenvflow from 'dotenv-flow';
+import { title } from 'process';
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development';
@@ -18,7 +19,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 1,
   workers: process.env.CI ? 1 : 2,
   reporter: [
-    ['allure-playwright'],
+    // ['allure-playwright'],
     // ['./custom.ts'],
     // [
     //   'json',
@@ -32,7 +33,7 @@ export default defineConfig({
     //     printSteps: true,
     //   },
     // ],
-    // ['html'],
+    ['html'],
   ],
 
   use: {
@@ -58,7 +59,7 @@ export default defineConfig({
       use: {
         // browserName: '',
         ...devices['Desktop Chrome'],
-        storageState: './auth/user.json',
+        storageState: './auth/user.json'
       },
       dependencies: ['setup'],
     },
