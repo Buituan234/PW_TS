@@ -172,3 +172,18 @@ test('TC07. Multipart form - Gửi txt file', async ({ request }) => {
     console.log('Tuổi người dùng là ',listBody.form_fields.age);
     console.log('Email người dùng là ',listBody.form_fields.email);
 })
+
+test('TC07. URL encode', async ({ request }) => {
+    // const access_token = await getToken(request)
+    const response = await request.post('/public/test/echo-urlencoded',{
+        form: {
+            userName: 'Nguyễn Văn B',
+            email: 'b@gmail.com',
+            message: 'abc',
+            password: 'P@ass word&123'
+        }
+    })
+    
+    const resBody = await response.json()
+    console.log(resBody);
+})
