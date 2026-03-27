@@ -726,3 +726,29 @@ vai trò: bộ lọc/ sắp xếp (filter/sort).nó ko làm thay đổi tài ngu
 /vào soppet và mình muốn tìm cái áo thun có màu đỏ
 
 URL' soppe/products/search?keyword=ao-thun&color=red
+
+header
+<form method= 'POST'>
+body username=admin&password=password&123
+& => %26 => password%26123
+body: json {
+"username": "admin",
+"password" : "password@123"
+}
+
+body: {
+
+  username: "Nguyễn Văn A",
+}
+kí tự NON-ASCII
+
+ê -> UTF-8 byte => %E1%BB%85
+
+
+hệ thống URL gốc chỉ chấp nhận bảng mã ASCII (các kí tự a-z, 0-9)
+oauth2 authentication (đăng nhập web mà thông qua google, facebook, zép lào....)
+header => application/x-www-form-urlencode
+PK 
+
+để có 1 clean pattern API framework
+chúng ta phải chia nhỏ các module thành những phần reuse cho các mục đích khác nhau
