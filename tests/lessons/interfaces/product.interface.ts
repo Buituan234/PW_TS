@@ -1,3 +1,4 @@
+// Lấy ra các key mà mình cần sử dụng trong respone của api product 
 export interface Product {
     id: number,
     name: string,

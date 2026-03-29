@@ -1,4 +1,5 @@
 import { test, expect, APIRequestContext } from '@playwright/test'
+import  fs  from 'fs'
 
 test('TC01. Register -> Login -> Lấy JWWT token', async ({ request }) => {
     // Đăng kí
@@ -142,7 +143,7 @@ test('TC05. Kiểm tra các item của page 2 khác với page 1', async ({ requ
 test('TC06. Multipart form - Gửi các text field', async ({ request }) => {
 
     // const access_token = await getToken(request)
-    // multipart form api không cần access_token
+    // multipart form api không cần access_token trong ví dụ này
     const listRes = await request.post('/public/test/echo-form', {
         multipart:{
             name: 'Bui bui',
@@ -164,6 +165,11 @@ test('TC07. Multipart form - Gửi txt file', async ({ request }) => {
             name: 'Bui bui',
             age: '24',
             email: 'btuan@gmail.com',
+            documents: {
+                name: 'text1',
+                mimeType: 'text/plain',
+                buffer: text
+            },
         }
     })
     expect(listRes.status()).toBe(200)
@@ -171,9 +177,33 @@ test('TC07. Multipart form - Gửi txt file', async ({ request }) => {
     console.log('Tên người dùng là ',listBody.form_fields.name);
     console.log('Tuổi người dùng là ',listBody.form_fields.age);
     console.log('Email người dùng là ',listBody.form_fields.email);
+    console.log('File name là ', listBody.files?.[0]?.filename);
+    
 })
 
-test('TC07. URL encode', async ({ request }) => {
+test('TC08. Multipart form - Gửi file', async({ request }) =>{
+    const document = fs.readFileSync('download/login-data-rename.xlsx')
+    const listRes = await request.post('/public/test/echo-form', {
+        multipart:{
+            name: 'Bui bui',
+            age: '24',
+            email: 'btuan@gmail.com',
+            documents: {
+                name: 'file tài liệu',
+                mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                buffer: document
+            },
+        }
+    })
+    expect(listRes.status()).toBe(200)
+    const listBody = await listRes.json()
+    console.log('Tên người dùng là ',listBody.form_fields.name);
+    console.log('Tuổi người dùng là ',listBody.form_fields.age);
+    console.log('Email người dùng là ',listBody.form_fields.email);
+    console.log('File name là ', listBody.files?.[0]?.filename);
+})
+
+test('TC09. URL encode', async ({ request }) => {
     // const access_token = await getToken(request)
     const response = await request.post('/public/test/echo-urlencoded',{
         form: {
