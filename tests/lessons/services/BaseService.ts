@@ -63,4 +63,11 @@ export class BaseService {
     return this.parseResponse<T>(response);
   }
 
+  async postRaw<D>(endpoint: string, data: D, option?: RequestOptions): Promise<APIResponse> {
+    return this.post(endpoint, {
+      data,
+      headers: option?.headers
+    })
+  }
+
 }
