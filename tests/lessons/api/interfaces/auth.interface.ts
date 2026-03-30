@@ -4,11 +4,12 @@ export interface LoginPayLoad {
 }
 
 export interface AuthResponse {
-    access_token: string,
+    accessToken: string,
     user?:{
         id: number,
         email: string,
         username: string,
     },
-    expires_in: string
+    expiresIn: string,
+    expiresAt: string,
 }

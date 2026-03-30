@@ -1,4 +1,4 @@
-import { BaseService } from "./BaseService";
+import { BaseService } from "../services/BaseService";
 import { AuthResponse } from "../interfaces/auth.interface";
 
 
@@ -18,9 +18,10 @@ export class AuthService extends BaseService {
         const token = authData.access_token
         this.currentToken = token
         return {
-            access_token: token,
+            accessToken: token,
             user: authData.user,
-            expires_in: authData.expires_in,
+            expiresIn: authData.expires_in,
+            expiresAt: authData.expires_at,
         }
     }
     getToken(): string|null {
