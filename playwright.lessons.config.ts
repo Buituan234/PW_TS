@@ -64,31 +64,23 @@ export default defineConfig({
       dependencies: ['setup'],
     },
     {
-      name: 'api',
+      name: 'neko-setup',
+      use: {
+        browserName: undefined,
+        baseURL: 'https://api-neko-coffee.autoneko.com'
+      },
+      testMatch: '/api/**/*.setup.ts'
+    },
+    {
+      name: 'neko-api',
       use: {
         browserName: undefined,
         //baseURL: 'https://jsonplaceholder.typicode.com',
         baseURL: 'https://api-neko-coffee.autoneko.com'
       },
       testMatch: '/api/**/*.spec.ts',
+      dependencies: ['neko-setup']
     },
-    // {
-    //   name: 'neko-setup',
-    //   use: {
-    //     browserName: undefined,
-    //     baseURL: 'https://api-neko-coffee.autoneko.com',
-    //   },
-    //   testMatch: '/api/**/neko.setup.ts',
-    // },
-    // {
-    //   name: 'neko-api',
-    //   use: {
-    //     browserName: undefined,
-    //     baseURL: 'https://api-neko-coffee.autoneko.com',
-    //   },
-    //   testMatch: '/api/**/*.spec.ts',
-    //   dependencies: ['neko-setup'],
-    // },
     // {
     //   name: 'setup-admin',
     //   testMatch: '/api/auth/**/admin.setup.ts',
