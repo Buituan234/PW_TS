@@ -752,3 +752,31 @@ PK
 
 để có 1 clean pattern API framework
 chúng ta phải chia nhỏ các module thành những phần reuse cho các mục đích khác nhau
+
+sẽ chia các api thuộc 1 nhóm thành 1 service ()
+
+mô hình nguyên khối tât cả các module tập hợp thành 1 khối to (ví dụ payment, noti, ekyc)
+
+mô hình microservices => chia nhỏ các modile thành các service khác nhau. mỗi service sẽ quản lý 1 công việc của riêngnos
+các khối liên kết bởi cầu nối API (restful api, grpc, graphql), mô hình pub/sub (rabbit mq, kafka...., event message)
+
+mình sẽ caafn 1 thằng chung chia sẻ tất cả các method, mà các thành phần con có thể sử dụng
+
+ví dụ như service Product chỉ quan tâm tới việc, get thông tin sản phẩm,tạo sản phẩm, upoad ảnh sản phẩm.. mà nó ko cần biết 
+gì về việc call api như nào,.... 
+
+
+ để thực hiện lưu token cho các bài test đối với API
+ chúng ta cần lưu trực tiếp vào file với phần trích xuất jwt - token
+ và sẽ xử lý đọc file đó để lấy token
+
+
+  Thì 
+  GET -> lấy dữ liệu
+  POST -> tạo mới dữ liệu
+  PUT/PATCH: bản chất là thay đổi thông tin của đối tượng đã có trong db
+  PUT: -> sẽ thay đổi toàn bộ thông tin của sản phẩm và yêu cầu phải đầy đủ body truyền lên
+  Nếu truyền thiếu thì trường đó mặc định sẽ trửo về null -> hoặc về default tùy nghiệp vụ
+  có nhưunxg trường required bắt buộc phải đẩy lên -> ví dụ nhưu tên sản phẩm 
+  PATCH: -> se thay đổi thông tin của sản phẩm theo body truyền lên mà ko ảnh hưởng tới các thông tin khác 
+  nghĩa là ta muón thay đổi gì thì ta truyền lên

@@ -1,4 +1,5 @@
 import { APIRequestContext, APIResponse } from '@playwright/test';
+import { ok } from 'node:assert';
 
 export interface RequestOptions {
   headers?: Record<string, string>;
@@ -61,6 +62,31 @@ export class BaseService {
       headers: this.mergeHeaders(options?.headers),
     });
     return this.parseResponse<T>(response);
+  }
+
+  async put<T,D>(endpoint: string, data: D, option?: RequestOptions): Promise<T>{
+    const response = await this.request.put(endpoint, {
+      data,
+      headers: this.mergeHeaders(option?.headers)
+    })
+    return this.parseResponse<T>(response)
+  }
+
+  async patch<T,D>(endpoint: string, data: D, option?: RequestOptions): Promise<T>{
+    const response = await this.request.patch(endpoint, {
+      data,
+      headers: this.mergeHeaders(option?.headers)
+    })
+    return this.parseResponse<T>(response)
+  }
+
+  async delete(endpoint: string, option?: RequestOptions): Promise<void>{
+    const reponse = await this.request.delete(endpoint, {
+      headers: this.mergeHeaders(option?.headers)
+    })
+    if(!reponse.ok()){
+      throw new Error(`DELETE FAILED: ${reponse.status()}`)
+    }
   }
 
   //PostRaw dùng riêng cho phần đăng nhập
