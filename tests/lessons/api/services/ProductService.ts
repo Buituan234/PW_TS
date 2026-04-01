@@ -1,4 +1,4 @@
-import { PaginationResponse, Product } from "../interfaces/product.interface";
+import { PaginationResponse, Product, ProductCreate, ProductPatch, ProductUpdate } from "../interfaces/product.interface";
 import { BaseService } from "./BaseService";
 
 export class ProductService extends BaseService {
@@ -16,5 +16,23 @@ export class ProductService extends BaseService {
 
     async getProduct(id: number): Promise<Product> {
         return this.get<Product>(`${this.basePath}/${id}`)
+    }
+
+    //Luồng CRUD => Create Read Update Delete
+
+    async createProduct(data: ProductCreate): Promise<Product>{
+        return await this.post<Product, ProductCreate>(this.basePath, data)
+    }
+
+    async updateProduct(id: number, data: ProductUpdate): Promise<Product>{
+        return this.put<Product, ProductUpdate>(`${this.basePath}/${id}`, data)
+    }
+
+    async patchProduct(id: number, data: ProductPatch): Promise<Product>{
+        return this.patch<Product, ProductPatch>(`${this.basePath}/${id}`, data)
+    }
+
+    async deleteProduct(id: number): Promise<void>{
+        return await this.delete(`${this.basePath}/${id}`)
     }
 }
