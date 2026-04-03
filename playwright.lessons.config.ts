@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+import { chromium, defineConfig, devices } from '@playwright/test';
 import dotenvflow from 'dotenv-flow';
 import { title } from 'process';
 
@@ -33,12 +33,12 @@ export default defineConfig({
         printSteps: true,
       },
     ],
-    // ['html'],
+    ['html'],
   ],
 
   use: {
     baseURL: 'https://crm.anhtester.com',
-    trace: 'on-first-retry',
+    trace: 'on',
     headless: false,
     video: 'on-first-retry',
     screenshot: 'off',
@@ -66,8 +66,8 @@ export default defineConfig({
     {
       name: 'neko-setup',
       use: {
-        browserName: undefined,
-        baseURL: 'https://api-neko-coffee.autoneko.com'
+        browserName: 'chromium',
+        baseURL: 'https://api-neko-coffee.autoneko.com',
       },
       testMatch: '/api/**/*.setup.ts'
     },

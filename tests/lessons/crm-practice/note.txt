@@ -780,3 +780,27 @@ gì về việc call api như nào,....
   có nhưunxg trường required bắt buộc phải đẩy lên -> ví dụ nhưu tên sản phẩm 
   PATCH: -> se thay đổi thông tin của sản phẩm theo body truyền lên mà ko ảnh hưởng tới các thông tin khác 
   nghĩa là ta muón thay đổi gì thì ta truyền lên
+
+
+  intercept là gì
+  gọi API từ FE -> BE 
+REAL API -> BE 
+intercept -> gọi nhân viên (playwright) chặn ngay từ bàn.
+ rút ra cái món ăn có hình thức gần giốgn hoặc giống hệt cái thật . MÀ BE ko hề biết gì về việc này
+trả lại cho người dùng cái response giả mà mình yêu cầu
+mock: giả lập response trả ra từ BE cho thằng FE
+
+- Speed: Tốc độ ; ko chờ server xử lý . ko chờ mạng. Response trả về tức thì.
+- Dữ liệu sạch: ko tạo data rác trong database 
+- kiểm thử kịch bản khó (edge case): giả lập đc những thứ server rất khó làm như server sập (500),
+mạng lag, lỗi dữ liệu (409)
+hệ thống core: giống như trading, bank => sẽ là hệ thống trung tâm cung cấp tất cả yêu cầu 
+cho các hệ thống vệ tinh
+ví dụ tôi là hệ thống thẻ (credit) => tôi cần thông tin KH từ core 
+- ổn định: bởi vì chúng ta giả lập res -> loại bỏ yếu tố do mạng lag hay server bảo trì
+
+-> thì đeer thực ghiện intercept trong playwright sử dụng
+
+await page.route('duong dan api muon chan', async(route)=>{
+  logic xy ly o day
+})
