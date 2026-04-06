@@ -105,3 +105,9 @@ export interface PaginationResponse<T> {
     data: T[],
     pagination: Pagination
 }
+
+export interface ImageUploadResponse {
+  image_url: string;
+  thumbnail_url?: string;
+  message?: string;
+}
