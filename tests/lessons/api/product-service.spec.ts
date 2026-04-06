@@ -1,4 +1,6 @@
+import { loadFromFolder } from './file-upload.util';
 import { test, expect } from './fixtures/gatekeeper.api.fixture'
+import { ProductService } from './services/ProductService';
 
 // test.describe('Product Service Test', () => {
 //     test('TC01. Get product list', async ({ productService }) => {
@@ -124,4 +126,17 @@ test('TC02. Soft assertion - tiếp tục khi fail', async ({ productService}) =
 
     console.log('Assertion 4: type === xxx sẽ là fail');
     expect.soft(respone.type, 'type muốn  === xxx').toBe('xxx')
+})
+
+test('TC03. Upload ảnh cho sản phẩm', async ({ productService})=> {
+    const list = await productService.getProducts({limit: 1})
+    const productId = list.data[0].id
+    console.log(`Product id: ${productId}`);
+    
+
+    const imageFile = loadFromFolder('2.jpg','files')
+    const UPLOAD_SERVER = 'https://uploads-neko-coffee.autoneko.com'
+    const result = await productService.uploadImage(productId, imageFile, UPLOAD_SERVER)
+    console.log(result.message);
+    console.log(result.image_url);
 })
