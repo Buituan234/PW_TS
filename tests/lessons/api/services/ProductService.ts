@@ -1,4 +1,4 @@
-import { PaginationResponse, Product, ProductCreate, ProductPatch, ProductUpdate } from "../interfaces/product.interface";
+import { ImageUploadResponse, PaginationResponse, Product, ProductCreate, ProductPatch, ProductUpdate } from "../interfaces/product.interface";
 import { BaseService } from "./BaseService";
 
 export class ProductService extends BaseService {
@@ -34,5 +34,16 @@ export class ProductService extends BaseService {
 
     async deleteProduct(id: number): Promise<void>{
         return await this.delete(`${this.basePath}/${id}`)
+    }
+
+    async uploadImage(
+        productId: number,
+        imageFile: {name: string, mimeType: string, buffer: Buffer},
+        baseUrl: string
+    ): Promise<ImageUploadResponse>{
+        return this.post<ImageUploadResponse, undefined>(`${this.basePath}/${productId}/image`, undefined, {
+            multipart: {image: imageFile},
+            baseURL:baseUrl
+        })
     }
 }

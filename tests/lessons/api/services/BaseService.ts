@@ -54,9 +54,10 @@ export class BaseService {
   }
 
   async post<T, D>(endpoint: string, data?: D, options?: RequestOptions): Promise<T> {
-    // const url = options?.baseURL ? `${options.baseURL}${endpoint}` : endpoint;
 
-    const response = await this.request.post(endpoint, {
+    const url = options?.baseURL ? `${options.baseURL}${endpoint}` : endpoint;
+
+    const response = await this.request.post(url, {
       data: options?.multipart ? undefined : data,
       multipart: options?.multipart,
       headers: this.mergeHeaders(options?.headers),
