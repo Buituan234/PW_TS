@@ -47,7 +47,7 @@ export class TabManager {
 
     // Switch sang một tab khác
     // page.bringToFront()
-    async switchTo(name: string): Promise<page>{
+    async switchTo(name: string): Promise<Page>{
         const page = this.tabs[name]
         if (!page){
             throw new Error(`Tab ${name} không tồn tại`)
