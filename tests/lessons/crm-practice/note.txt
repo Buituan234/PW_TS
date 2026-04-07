@@ -804,3 +804,22 @@ ví dụ tôi là hệ thống thẻ (credit) => tôi cần thông tin KH từ c
 await page.route('duong dan api muon chan', async(route)=>{
   logic xy ly o day
 })
+
+thằng PW có 1 feature rất hay 
+đc gọi là waitForResponse() - những tác vụ chạy nền như là download, upload, auto save
+
+word văn bản (sau 10s chẳng hạn word sẽ tự động save) -> có 1 số web có chức năng auto save (ở dưới nền - k có UI để tương tác)
+thì làm sao chúng ta dùng UI mà xử lý????? -> API -> FE sẽ gọi api save xuống BE -> wait for response autosave gọi API thành công ->
+
+trước 1 hành động chúng ta phải ném 1 cái bẫy (hay goiuj là event() => event liên quan tới việc kiểm soát cái action đấy)
+
+
+1 tab = 1 page
+
+1 browser = 1 context
+
+-> multi tab => multi page 
+
+popup windows = 1 tab = 1 page
+
+Mục tiêu: là xây dựng đc 1 danh sách các tab, popup window -> chúng ta có thể di chuyển hoặc switch dễ dàng
