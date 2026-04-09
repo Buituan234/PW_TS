@@ -90,7 +90,7 @@ export default defineConfig({
       }
     },
     {
-      name: 'setup-staf',
+      name: 'setup-staff',
       testMatch: '**/auth/staff.setup.ts',
       use: {
         ...devices['Desktop Chrome'],
