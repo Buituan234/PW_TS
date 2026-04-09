@@ -823,3 +823,87 @@ trước 1 hành động chúng ta phải ném 1 cái bẫy (hay goiuj là event
 popup windows = 1 tab = 1 page
 
 Mục tiêu: là xây dựng đc 1 danh sách các tab, popup window -> chúng ta có thể di chuyển hoặc switch dễ dàng
+
+có 1 action -> chúng ta phải đặt event trước action
+thì tab với windows tương tự
+page.waitforEvent('popup') -> popup windows
+page.waitforEvent('page') -> tab
+
+KHi test permission , multi role. -> người ta cũng sẽ defined ra rất nhiều role và rất nhiều permission
+
+làm ma trận phân quyền
+    staff manager admin
+C    Y 
+R    N
+U    N
+D    Y
+
+authen và author
+
+SELECT * FROM PRODUCT ORDER BY ID DESC LIMIT 10
+
+// CHiến thuật setup chung: Lâys trạng thái đăng nhập làm tiền điều kiện
+/// Với UI
+Browser sự tự động capture : storageStage *Trạng thái đăng nhập khi mình khai báo ở dependencies project
+
+
+1. User điền form -> click login
+->
+2. Browser sẽ gửi request xxuoosng server
+->
+3. Server sẽ trả về:
+  - Set-Cookie: session=abbc123, httOnly --> cookie
+  - Respont-body: {access_token: "abc"}
+
+4. Javascript của app sẽ set giá trị:
+localstorage.setItem("access_token", "abc")
+
+5. Browser bây giờ đã có:
+Cookie:
+session: abc123 
+
+hoặc
+
+localstorage:
+access_token: "abc"
+
+await page.context.storageState = chụp toàn bộ trạng thái browser
+-> File chứa tất cả Cookie + localstorage
+
+///Với api
+const response = await request.post("/api/auth/login", {
+  data: {}
+})
+
+server trả về
+{access_token: "abc"}
+
+nhưng sẽ khoog có browser/ local storage / cookie
+
+
+
+// db
+//nhiều cách để call db (rất nhiều thư viện hỗ trợ -> mình sẽ viết thành viết base sql (khởi tạo connection, quản lý config, pool, room...)
+-> call xuống tầng repo), transaction, commit, rollback... -> fixture hết 
+thì sẽ chia thành tầng model  (bảng, cột) ORM mapping từ database thành các class của typescript
+tầng repository -> mình sẽ khai báo các câu query với db (slect, update, insert, delete.... kết nối với thằng model)
+tầng service -> bao gồm các business logic (ví dụ lấy toàn bộ thông tin học sinh theo lớp, khối....... sẽ gọi reposuitory)
+tầng controller (bao gồm endpoint api và kết nối -> service )
+
+-> fixture kết nối hết tất cả service -> dùng gọi DI (inject tất cả service -> fixture)
+-< bài test gọi fixture bình thường thay vì gọi services...
+
+
+API : clean
+UI : clean 
+=> API + UI  = clean
+
+
+-> middle: 
+
+
+/rule
+/skill
+
+muốn kết hợp AI + project -> xây dựng đc cái móng của project và phải hiểu được project 
+-> sau đó mới chỉ lại rule , skill cho AI để nó tuân theo
