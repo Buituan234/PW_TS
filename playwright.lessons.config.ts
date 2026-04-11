@@ -106,17 +106,17 @@ export default defineConfig({
         baseURL: 'https://coffee.autoneko.com/',
       }
     }
-    // {
-    //   name: 'neko-combined',
-    //   testMatch: '/specs/*.spec.ts',
-    //   dependencies: ['neko-setup'],
-    //   use: {
-    //     ...devices['Desktop Chrome'],
-    //     baseURL: 'https://coffee.autoneko.com',
-    //     storageState: './auth/admin.json',
-    //     viewport: { width: 1280, height: 720 },
-    //   },
-    // },
+    {
+      name: 'neko-combined',
+      testMatch: '/specs/*.spec.ts',
+      dependencies: ['neko-setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'https://coffee.autoneko.com',
+        storageState: './auth/admin.json',
+        viewport: { width: 1280, height: 720 },
+      },
+    },
   ],
 });
 // api-ui-combo.spec.ts
