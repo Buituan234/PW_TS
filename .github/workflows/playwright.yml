@@ -9,11 +9,11 @@ jobs:
     name: Chào mừng
     runs-on: ubuntu-latest
 
-    step:
+    steps:
       - name: In ra thông báo
         run: |
           echo "Xin chao đây là dòng đầu tiên"
-          echo1 "Xin chao bạn nhé!"
+          echo "Xin chao bạn nhé!"
 
   # test:
   #   timeout-minutes: 60
