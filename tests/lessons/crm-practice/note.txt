@@ -907,3 +907,48 @@ UI : clean
 
 muốn kết hợp AI + project -> xây dựng đc cái móng của project và phải hiểu được project 
 -> sau đó mới chỉ lại rule , skill cho AI để nó tuân theo
+
+CI/CD
+CI: Continuos Integration (Tích hợp liên tục)
+- đợi tí đang deploy đang build...... 
+- sẽ dẫn tới xung đột (conflict) -> dưới phần code ở môi trường dev (nghĩa là dev sẽ fix conflict ở máy của họ)
+- Vai trò của automation là gì???
++ là chốt chặn đầu tiên
++ mỗi khi dev tạo pull request (PR).  -> automation sẽ chạy 
+-> rõ ràng là mình ko thể ngôi ở máy local đợi thằng dev nó báo là tạo PR -> đẻ run test npx playwright test....
+-=> tự động chạy code automation khi mà bên dev thực hiện PR -> quy trình này cũng giống như bên dev là automation cũng có
+1 quy trình CI riêng
+
+CD: Continuos Delivery (Triển khai liên tục)
+thực ra là việc deploy lên server run app ví dụ nhưu k8s, hoặc docker, hoặc cloud (như là aws, azure, google cloud)
+đống vai trò trong việc ví dụ là build report -> hoặc là chạy code regresstion test sau khi lên môi trường mới 
+
+tạo thư mục root (cùng cấp với package.json)
+.github
+workflows
+
+
+để làm cho github chạy ci -> chúng ta phải viết 1 file chỉ dẫn cho nó 
+đầu ra alf chỉ cho thằng github biết cách chạy được projecrt với cú pháp npx playwright test.....
+file chỉ dẫn sẽ có tên đuôi (ext) là .yml
+
+chúng ta sẽ cần 1 cái máy để chạy code 
+ví dụ như máy windows, macos. ubuntu
+thằng github cung cần 1 cái máy để chạy
+0-> chỉ dẫn hay nói cho github là mượn 1 cái máy tính có hệ đề hành...
+để chạy code
+
+giá cả: liên quan tới việc khởi tạo hệ điều hành 
+-> cài windows. macos mất rât nhiều thời gian )có thể tới hàng h đồng hồ,
+-> thời hạn limit: 2000 phút free 
+-> giải quyết là dùng ubuntu 
+minh sẽ đưa ra các chỉ dẫn qua câu lệnh command line cho thằng ubuntu chạy
+run là tổ hợp câu lệnh mà thằng github sẽ chạy trên ubutnu
+để in chữ ở trong giao diện ubuntu chúng ta sẽ dùng echo
+echo "xin chao các bạn"
+
+chạy được nhiều workflows -> các workflows có thể gọi tới nhau
+
+quy trình PRO(hay sử dụng): người ta hay dùng reportportal  (real time kết quả)
+
+biến môi trường
