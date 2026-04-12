@@ -14,6 +14,9 @@ jobs:
         run: |
           echo "Xin chao đây là dòng đầu tiên"
           echo "Xin chao bạn nhé!"
+          echo "Thời gian $(date)"
+          echo "Người push ${{github.actor}}"
+          echo "Repository ${{github.repository}}"
 
   # test:
   #   timeout-minutes: 60
