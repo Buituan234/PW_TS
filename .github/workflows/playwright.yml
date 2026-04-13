@@ -4,7 +4,7 @@ on:
   #   branches: [ main, master ]
   # pull_request:
   #   branches: [ main, master ]
-  workflow-dispatch:
+  workflow_dispatch:
 jobs:
   hello:
     name: Chào mừng
