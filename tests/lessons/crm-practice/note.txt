@@ -948,7 +948,18 @@ run là tổ hợp câu lệnh mà thằng github sẽ chạy trên ubutnu
 echo "xin chao các bạn"
 
 chạy được nhiều workflows -> các workflows có thể gọi tới nhau
+bản chất khi chạy ci/cd là chúng ta sẽ sử dụng 1 con agent -> Đóng vai trò như 1 máy tính để thực hiện 
+chạy test hay code
+nếu có nhiều agent thì có nhiều máy tính ảo để chạy test
+tùy vào timeszie của từng công ty sẽ được cấp 1 server riêng, server đó có thể sử dụng agent
+agent này được liên kết với github/gitlab
+
 
 quy trình PRO(hay sử dụng): người ta hay dùng reportportal  (real time kết quả)
 
 biến môi trường
+biến môi trường ở  github có 3 cấp độ:
+1. cấp độ workflows > Nhỏ nhất
+2. jobs
+3. step > Cao nhất
+sẽ có mức độ ưu tiên là tăng dần
