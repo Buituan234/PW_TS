@@ -963,3 +963,8 @@ biến môi trường ở  github có 3 cấp độ:
 2. jobs
 3. step > Cao nhất
 sẽ có mức độ ưu tiên là tăng dần
+
+khi muốn in 1 biến ở trong github yml file thì có 2 cách:
+1. ${{}} > Tìm và thay thế trước khi chạy > DÙng để lấy những dữ liệu tĩnh
+(ví dụ secret, inputs, tên nhánh, tên người Chạy)
+2. $(Ten_Bien) > Chạy lệnh và lấy kết quả sử dụng ở ubuntu hay linux bash shell

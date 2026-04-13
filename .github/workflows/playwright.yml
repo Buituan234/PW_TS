@@ -37,7 +37,8 @@ jobs:
         run: echo "npm install"
 
       - name: Step 4 -  cài playwright browser 
-        run: echo "npcx playweight insall-deps"
+        # run: echo "npcx playweight insall-deps"
+        run: echo "Chào ${{github.actor}}, runner ${{runner.os}} bây giờ là $(date)"
 
       - name: Step 5 -  Chạy test
         env:
