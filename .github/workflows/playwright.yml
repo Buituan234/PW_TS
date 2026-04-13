@@ -71,7 +71,7 @@ jobs:
         run: npm install
 
       - name: Step 4 - Chạy test để đọc env
-        run: npx tsx tests/lessons/print-env.tsx
+        run: npx tsx tests/lessons/print-env.ts
         env: 
           MY_PASSWORD: ${{secrets.MY_PASSWORD}}
           MY_WEBSITE: ${{vars.MY_WEBSITE}}
