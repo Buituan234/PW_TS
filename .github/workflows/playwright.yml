@@ -1,23 +1,51 @@
 name: Demo CI
 on:
-  # push:
-  #   branches: [ main, master ]
-  # pull_request:
-  #   branches: [ main, master ]
-  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  # workflow_dispatch:
 jobs:
-  hello:
-    name: Chào mừng
+  # hello:
+  #   name: Chào mừng
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: In ra thông báo
+  #       run: |
+  #         echo "Xin chao đây là dòng đầu tiên"
+  #         echo "Xin chao bạn nhé!"
+  #         echo "Thời gian $(date)"
+  #         echo "Người push ${{github.actor}}"
+  #         echo "Repository ${{github.repository}}"
+  test01: 
+    name: Job1 - chạy test
     runs-on: ubuntu-latest
 
     steps:
-      - name: In ra thông báo
-        run: |
-          echo "Xin chao đây là dòng đầu tiên"
-          echo "Xin chao bạn nhé!"
-          echo "Thời gian $(date)"
-          echo "Người push ${{github.actor}}"
-          echo "Repository ${{github.repository}}"
+      - name: Step 1- Check out code
+        run: echo "Checkout code từ repository"
+
+      - name: Step 2 -  cài node.js 
+        run: echo "Cài đặt nodejs"
+
+      - name: Step 3 -  cài dependencies từ package.json 
+        run: echo "npm install"
+
+      - name: Step 4 -  cài playwright browser 
+        run: echo "npcx playweight insall-deps"
+
+      - name: Step 5 -  Chạy test
+        run: echo "npx playwright test"
+
+  deploy:
+    name: Job2 - deploy
+    runs-on: ubuntu-latest
+    needs: test01
+
+    steps:
+      - name: Tạo report
+        run: echo "Tạp report"
 
   # test:
   #   timeout-minutes: 60
