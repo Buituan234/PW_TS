@@ -967,4 +967,23 @@ sẽ có mức độ ưu tiên là tăng dần
 khi muốn in 1 biến ở trong github yml file thì có 2 cách:
 1. ${{}} > Tìm và thay thế trước khi chạy > DÙng để lấy những dữ liệu tĩnh
 (ví dụ secret, inputs, tên nhánh, tên người Chạy)
+- github: thông tin về workflow/repo
+- job. : trạng thái job
+- step. : output từ step
+- secrets. : github secret (github quản lý)
+- vars > github variable (github quản lý)
+- runner
+
 2. $(Ten_Bien) > Chạy lệnh và lấy kết quả sử dụng ở ubuntu hay linux bash shell
+
+// khi chạy test chúng ta sẽ quản lý theo môi trường dev hoặc uat
+-> sẽ có secret, vars phụ thuộc vào moou trường dev hay uat
+thì mình sẽ tạo enviroment trên github và bảo github quản lý môi trường cho chúng ta
+
+secret -> Khai báo 1 lần đầu tiên duy nhất và không hiển thị lại thông tin cũ khi muốn update
+khi in ra màn hình nó sẽ tự động được mask *****
+dùng cho các dữ liệu nhạy cảm: password
+
+vars -> Khai báo sửa thoải mái
+
+khi lấy ra phải gán ngược lại vào 1 cái biến để truy cập lại

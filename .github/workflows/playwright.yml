@@ -5,6 +5,12 @@ on:
   # pull_request:
   #   branches: [ main, master ]
   workflow_dispatch:
+    inputs:
+      environments:
+        description: 'chọn môi trường'
+        type: choice
+        option: [DEV, UAT]
+        default: 'DEV'
 env:
   MY_VAR: "workflow"
 jobs:
@@ -20,31 +26,56 @@ jobs:
   #         echo "Thời gian $(date)"
   #         echo "Người push ${{github.actor}}"
   #         echo "Repository ${{github.repository}}"
-  test01: 
-    name: Job1 - chạy test
-    env:
-      MY_VAR: "jobs"
+  # test01: 
+  #   name: Job1 - chạy test
+  #   env:
+  #     MY_VAR: "jobs"
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Step 1- Check out code
+  #       run: echo "Checkout code từ repository"
+
+  #     - name: Step 2 -  cài node.js 
+  #       run: echo "Cài đặt nodejs"
+
+  #     - name: Step 3 -  cài dependencies từ package.json 
+  #       run: echo "npm install"
+
+  #     - name: Step 4 -  cài playwright browser 
+  #       # run: echo "npx playwright install-deps"
+  #       run: echo "Chào ${{github.actor}}, runner ${{runner.os}} bây giờ là $(date)"
+
+  #     - name: Step 5 -  Chạy test
+  #       env:
+  #         MY_VAR: "steps"
+  #       # run: echo "npx playwright test"
+  #       run: echo $MY_VAR
+  
+  test02:
+    name: Job2 - chạy test đa môi trường
     runs-on: ubuntu-latest
-
+    timeout-minutes: 10
+    environment: ${{inputs.environments || 'DEV'}}
     steps:
-      - name: Step 1- Check out code
-        run: echo "Checkout code từ repository"
+      - name: step 1 - Check out code
+        uses: actions/checkout@v4
 
-      - name: Step 2 -  cài node.js 
-        run: echo "Cài đặt nodejs"
+      - name: step 2 - Cài node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-      - name: Step 3 -  cài dependencies từ package.json 
-        run: echo "npm install"
+      - name: step 3 - cài dependencies từ package.json
+        run: npm install
 
-      - name: Step 4 -  cài playwright browser 
-        # run: echo "npcx playweight insall-deps"
-        run: echo "Chào ${{github.actor}}, runner ${{runner.os}} bây giờ là $(date)"
+      - name: Step 4 - Chạy test để đọc env
+        run: npx tsx tests/lessons/print-env.tsx
+        env: 
+          MY_PASSWORD: ${{secrets.MY_PASSWORD}}
+          MY_WEBSITE: ${{vars.MY_WEBSITE}}
 
-      - name: Step 5 -  Chạy test
-        env:
-          MY_VAR: "steps"
-        # run: echo "npx playwright test"
-        run: echo $MY_VAR
 
   # deploy:
   #   name: Job2 - deploy
@@ -55,7 +86,7 @@ jobs:
   #     - name: Tạo report
   #       run: echo "Tạp report"
 
-  # test:
+  # test03:
   #   timeout-minutes: 60
   #   runs-on: ubuntu-latest
   #   steps:
