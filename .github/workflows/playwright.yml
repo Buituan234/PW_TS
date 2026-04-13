@@ -8,8 +8,6 @@ on:
 env:
   MY_VAR: "workflow"
 jobs:
-  env:
-    MY_VAR: "jobs"
   # hello:
   #   name: Chào mừng
   #   runs-on: ubuntu-latest
@@ -24,6 +22,8 @@ jobs:
   #         echo "Repository ${{github.repository}}"
   test01: 
     name: Job1 - chạy test
+    env:
+      MY_VAR: "jobs"
     runs-on: ubuntu-latest
 
     steps:
