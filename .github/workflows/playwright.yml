@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       environments:
-        description: 'chọn môi trường'
+        description: 'Chọn môi trường'
         type: choice
-        option: [DEV, UAT]
+        options: [DEV, UAT]
         default: 'DEV'
 env:
   MY_VAR: "workflow"
