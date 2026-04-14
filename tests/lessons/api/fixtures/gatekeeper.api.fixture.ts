@@ -1,11 +1,11 @@
 import { AuthApiFixture, test as authTest } from "./auth.api.fixture";
-import { serviceFixture, ServicesFixture } from "./services.fixture";
+import { serviceFixtures, ServicesFixtures } from "./services.fixture";
 import { expect } from  '@playwright/test'
 
-export type GateKeeperApiFixture = AuthApiFixture & ServicesFixture
+export type GateKeeperApiFixture = AuthApiFixture & ServicesFixtures
 
 export const test = authTest.extend<GateKeeperApiFixture>({
-    ...serviceFixture
+    ...serviceFixtures
 })
 
-export { expect }
+export { expect } from '@playwright/test'
