@@ -87,6 +87,13 @@ jobs:
           MY_PASSWORD: ${{secrets.MY_PASSWORD}}
           MY_WEBSITE: ${{vars.MY_WEBSITE}}
 
+      - name: Upload test results
+        if: always()
+        uses: action/upload-artifact/@v4
+        with:
+          name: playwright-report
+          path: playwright-report/ 
+
 
   # deploy:
   #   name: Job2 - deploy
