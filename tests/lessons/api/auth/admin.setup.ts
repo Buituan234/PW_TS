@@ -8,6 +8,6 @@ setup('Setup admin', async({page, context}) => {
         await expect(page.getByRole('button', { name: 'Tiếp tục' })).toBeVisible();
         await page.getByRole('button', { name: 'Tiếp tục' }).click();
 
-        await context.storageState({path: './auth/admin.setup.json'})
+        await context.storageState({path: './auth/admin.json'})
         console.log('[Setup] Admin đăng nhập thành công');
 })

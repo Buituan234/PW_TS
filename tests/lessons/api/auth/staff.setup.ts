@@ -8,6 +8,6 @@ setup('Setup staff', async({page, context}) => {
         await expect(page.getByRole('button', { name: 'Tiếp tục' })).toBeVisible();
         await page.getByRole('button', { name: 'Tiếp tục' }).click();
 
-        await context.storageState({path: './auth/staff.setup.json'})
+        await context.storageState({path: './auth/staff.json'})
         console.log('[Setup] Staff đăng nhập thành công');
 })

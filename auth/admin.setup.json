@@ -6,11 +6,11 @@
       "localStorage": [
         {
           "name": "access_token",
-          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQG5la29jb2ZmZWUudm4iLCJleHAiOjE3NzYxMjk1NjEsImlhdCI6MTc3NjEyNzc2MSwicm9sZSI6ImFkbWluIiwic3ViIjoxLCJ1c2VybmFtZSI6ImFkbWluIn0.XAPYcKfpoMgmoiRYmCkhvqnGfTyc0cmxtWmHhb4vpRw"
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQG5la29jb2ZmZWUudm4iLCJleHAiOjE3NzYxNjE5NzYsImlhdCI6MTc3NjE2MDE3Niwicm9sZSI6ImFkbWluIiwic3ViIjoxLCJ1c2VybmFtZSI6ImFkbWluIn0.IqHSQsNAvkeUDd30kh1TBLeMnRwqpyTDF9pMu4gRN7U"
         },
         {
           "name": "neko_auth",
-          "value": "{\"state\":{\"user\":{\"id\":1,\"username\":\"admin\",\"email\":\"admin@nekocoffee.vn\",\"role\":\"admin\",\"phone\":\"222222222\",\"display_name\":\"222\",\"is_active\":true,\"created_at\":\"2026-01-19T16:20:21Z\"},\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQG5la29jb2ZmZWUudm4iLCJleHAiOjE3NzYxMjk1NjEsImlhdCI6MTc3NjEyNzc2MSwicm9sZSI6ImFkbWluIiwic3ViIjoxLCJ1c2VybmFtZSI6ImFkbWluIn0.XAPYcKfpoMgmoiRYmCkhvqnGfTyc0cmxtWmHhb4vpRw\",\"refreshToken\":\"v46dd05YiWznz9ePuxIw4WRDRSscUNeFM5XuZHCIpJ4=\",\"expiresAt\":1776129561347,\"isAuthenticated\":true},\"version\":0}"
+          "value": "{\"state\":{\"user\":{\"id\":1,\"username\":\"admin\",\"email\":\"admin@nekocoffee.vn\",\"role\":\"admin\",\"phone\":\"222222222\",\"display_name\":\"222\",\"is_active\":true,\"created_at\":\"2026-01-19T16:20:21Z\"},\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQG5la29jb2ZmZWUudm4iLCJleHAiOjE3NzYxNjE5NzYsImlhdCI6MTc3NjE2MDE3Niwicm9sZSI6ImFkbWluIiwic3ViIjoxLCJ1c2VybmFtZSI6ImFkbWluIn0.IqHSQsNAvkeUDd30kh1TBLeMnRwqpyTDF9pMu4gRN7U\",\"refreshToken\":\"PSTmjezPJSGCpHyPcNtP4FR15B0s7Jek-K7WCBn9evM=\",\"expiresAt\":1776161976578,\"isAuthenticated\":true},\"version\":0}"
         },
         {
           "name": "user",
@@ -18,7 +18,7 @@
         },
         {
           "name": "refresh_token",
-          "value": "v46dd05YiWznz9ePuxIw4WRDRSscUNeFM5XuZHCIpJ4="
+          "value": "PSTmjezPJSGCpHyPcNtP4FR15B0s7Jek-K7WCBn9evM="
         }
       ]
     }
