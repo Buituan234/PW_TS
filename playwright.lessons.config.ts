@@ -39,7 +39,7 @@ export default defineConfig({
   use: {
     baseURL: 'https://crm.anhtester.com',
     trace: 'on',
-    headless: false,
+    headless: true,
     video: 'on-first-retry',
     screenshot: 'off',
   },
@@ -105,7 +105,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         baseURL: 'https://coffee.autoneko.com/',
       }
-    }
+    },
     {
       name: 'neko-combined',
       testMatch: '/specs/*.spec.ts',

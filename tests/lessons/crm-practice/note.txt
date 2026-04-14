@@ -987,3 +987,6 @@ dùng cho các dữ liệu nhạy cảm: password
 vars -> Khai báo sửa thoải mái
 
 khi lấy ra phải gán ngược lại vào 1 cái biến để truy cập lại
+
+khi chạy CI/CD sẽ ko có GUI (Giao diện tương tác)
+> Phải sửa headless: true

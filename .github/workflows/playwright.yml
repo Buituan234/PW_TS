@@ -11,6 +11,13 @@ on:
         type: choice
         options: [DEV, UAT]
         default: 'DEV'
+      config:
+        description: 'Chọn config file'
+        type: choice
+        options: 
+          - playwright.lessons.config.ts
+          - playwright.config.ts
+        default: 'DEV'
 env:
   MY_VAR: "workflow"
 jobs:
@@ -70,8 +77,12 @@ jobs:
       - name: step 3 - cài dependencies từ package.json
         run: npm install
 
-      - name: Step 4 - Chạy test để đọc env
-        run: npx tsx tests/lessons/print-env.ts
+      - name: Step 4 - cài playwright browser
+        run: npm playwright install --with-deps chromium
+
+      - name: Step 5 - Run test
+        # run: npx tsx tests/lessons/print-env.ts
+        run: npx playwright test api-ui-combo --config=${{inputs.config}} --project=neko-combined
         env: 
           MY_PASSWORD: ${{secrets.MY_PASSWORD}}
           MY_WEBSITE: ${{vars.MY_WEBSITE}}
