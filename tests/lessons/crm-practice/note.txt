@@ -990,3 +990,21 @@ khi lấy ra phải gán ngược lại vào 1 cái biến để truy cập lạ
 
 khi chạy CI/CD sẽ ko có GUI (Giao diện tương tác)
 > Phải sửa headless: true
+
+
+để có thể lưu được file report trên ci/cd thì có thể dùng
+artifact (Nó giống như cái kho lưu trữ dữ liệu sau mỗi lần chạy)
+
+để đặt lịch hẹn chạy theo khung giờ có thể dùng: schedule trong On (ngang với push và pull_request)
+schedule:
+  - cron: '0 9 * * *'
+
+  0 9 * * * -> Mỗi ngày lúc 9:00 (UTC) gọi là 16:00 Văn
+  1 2 3 4 5
+
+  tương ứng với thứ tự trên:
+  1: phút (0-59)
+  2: giờ (0-23)
+  3: ngày trong tháng (1-31)
+  4: tháng (1-12)
+  5: thứ trong tuần (0-6) chú ý 0 là chủ nhật, 1 là thứ 2, 2 là thứ 3, ...

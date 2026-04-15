@@ -18,6 +18,8 @@ on:
           - playwright.lessons.config.ts
           - playwright.config.ts
         default: 'DEV'
+  schedule:
+    - cron: '0 9 * * *'
 env:
   MY_VAR: "workflow"
 jobs:
