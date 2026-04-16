@@ -1,0 +1,101 @@
+Bài 1: 
+Các chức năng của Page có thể thực hiện:
++ Điều hướng: page.goto(), page.goBack(), page.goForward(), page.reload()
++ Tương tác với các phần tử (Đôi mắt và đôi tay): Tạo ra các công thức tìm kiếm locator và tương tác với các locator đó
+qua click, press, hover,..
++ Truy vấn và khẳng định: nó có thể đọc url trang (page.url()) hay đọc title (page.title())
+và kết hợp với các câu expect: await expect(page.URL()).toHaveURL(), ...
++ Xử lý môi trường trang: 
+Xử lý dialog: có thể bắt được các hộp thoại alert, confirm, prompt và tương tác với các hộp thoại này
+Giả lập mạng: nó có thể chặn các request mạng, thay đổi respose trả về hoặc là cho request bị lỗi > Giả lập chạy 
+không cần tương tác với BE > test case chạy nhanh hơn
++ Thực thi mã Typescript (Cần học thêm)
++ Chụp ảnh và quay video màn hình: page.screenshot({path: 'screenshot.png'})
+
+Cấu trúc tạo nên Page:
+BrowserType (lõi của trình duyệt: Chromine, Webkit, firefore)
+|
+Browser (Cho chạy trình duyệt đó)
+|
+BrowserContext: Như là 1 profile của Browser nơi giúp lưu trữ các session, cookies, localStorage (Người dùng riêng)
+|
+Page: Tab ở trong browser, mỗi BrowserContect có thể có nhiều page (tab)
+Khi mà chạy test(async({page}) => ) thì pW test runner đã tự động khởi tạo các thông tin trên và inject vào (fixture)
+
+Không chỉ chủ động tạo nên page mà playwright còn chủ động tạo nen các dependencies khác như:
+const toolboxObject = {
+    page: aPageObject,
+    context: aBrowserContext,
+    browser: aBrowserIntance,
+    browserName: 'Chromium',
+    request: anAPIRequestContext,
+    // và nhiều các fixture khác nhưng trong khóa này chủ yếu là các fixture này
+}
+
+Cách dùng fixture như này có ý nghĩa:
++ Rõ ràng và tường minh: Hiểu ngay cần truyền thêm những gì để phục vụ bài test
++ Lịch hoạt, dễ mở rộng: Có thể tạo thêm các fixture phù hợp với nhu cầu của bản thân mà không ảnh hưởng cái cũ
++ Hiệu quả: Chỉ cần tạo ra những cái thứ mình yêu cầu, không khởi taoh bừa phứa gây tốn tài nguyên
++ Sạch sẽ: Thay vì cần khởi tạo từ đầu gây dài hoặc gây lặp code giữa các bài test
+
+
+Bài 2: 
+Codegen là gì: Nó là trình tạo mã giúp tự động viết các lệnh PW tương ứng với các hành động ta thực hiện trên UI
+Từ đó có thể biến các tương tác thủ công thành kịch bản test 
+Codegen ngoài việc hỗ trợ lưu lại các thao tác của người dùng nó còn có thể thêm các assertion
+(Nhưng chỉ dành cho người mới bắt đầu lập trình auto)
+
+Cách tổ chức 1 file tets PW hiệu quả:
+- Cách đơn giản nhất là tạo 1 danh sách toàn các test()
++ Ưu điểm: đơn giản, nhanh chóng 
++ Nhược điểm: Khó bảo trì, không có sự nhóm gộp, có thể gây lặp code
+- Cách gộp các test() trong các test.describe()
++ Ưu điểm: Có thể gộp các test liên quan với nhau thành 1 nhóm, dễ dàng chạy các code chung trước khi vào test nhỏ
+(như là tets.beforeEach trong các test.describe())
+
+Khi chạy npx playwright test thì nó sẽ chỉ tìm và tets các file *.spec.ts (hoặc js) hoặc *.test.ts (do tiêu chuẩn cộng
+đồng đề ra) > giúp thông nhất giữa mọi người với nhau
+Nhưng người dùng hoàn có thể thay đổi đuôi và chạy theo tên mà người dùng mong muốn bằng cách thay đổi cài đặt 
+testMatch trong file playwright.config.ts 
+
+test.step() là gì?
+Nó giống như các bước mô tả các bước nhỏ trong bài test của chúng ta: Chia nhỏ bài test với các mô tả rõ ràng
+Giúp chạy bài test chi tiết hơn, dễ dàng bắt được lỗi xảy ra ở phần nào 
+Ngoài ra có thể thực hiện các hành động có điều kiện như  step.skip(Điều kiện) khi inject step vào async giúp 
+bỏ qua các bước mà vẫn giữ được trạng thái pass của test case
+
+Annotation (chú thích)
+Là các chú thích mà người dùng gắn vào các test case hoặc test.describe để ra lệnh cho Test Runner xử lý
+Có 2 cấp độ: 
++ Cho toàn bộ test() hoặc test.describe()
+test.skip('Tính năng chưa được hoàn thiện', async({page}) => {
+    // Code sẽ không được chạy
+} )
+
+test.describe.skip('Toàn bộ tính năng test cho Admin page', () => {
+    // Tất cả test() bên trong sẽ bị bỏ qua
+})
+
+test('Test giao diện', async({page, browserName}) => {
+    // Nếu không phải webkit thì bỏ qua test này
+    test.skip(browserName !== 'webkit', 'Giao diện này tối ưu cho webkit')
+    // Code cho webkit
+})
+
+test.fail('test case này đang thất bại do bug xyz', async({page}) => {
+    // code gây lỗi
+}) >> Casse này được kì vọng là sẽ fail, khi chạy nếu mà fail thì sẽ tính là pass nhưng nếu chạy ra pass thì lại fail
+
+Ngoài ra còn có:
+test.fixme(description): đánh dấu một test đang bị hỏng và cần được sửa
+test.slow(description): đánh dấu một case cần chạy chậm, nâng thời gian timeout lên 
+test.only(description): chỉ duy nhất test case hoặc nhóm test case này được chạy, tất cả các case khác trong dự án
+sẽ bị bỏ qua
+>> Cảnh bảo: Tuyệt đối không bao giờ commit code chứa test.only và nhánh chính (main/master) vì khi chạy trên CI/CD sẽ
+bỏ qua toàn bộ test case khác
+
++ Cho một test.step() cụ thể bên trong mỗi test:
+test.skip(condition, description): chỉ sử dụng bên trong test.step() và nó sẽ bỏ qua 1 bước cụ thể nào đó khi không
+đáp ứng được điều kiện
+
+
