@@ -1,0 +1,255 @@
+Bài 1: Tìm hiểu khái niệm cốt lỗi 
+Các chức năng của Page có thể thực hiện:
++ Điều hướng: page.goto(), page.goBack(), page.goForward(), page.reload()
++ Tương tác với các phần tử (Đôi mắt và đôi tay): Tạo ra các công thức tìm kiếm locator và tương tác với các locator đó
+qua click, press, hover,..
++ Truy vấn và khẳng định: nó có thể đọc url trang (page.url()) hay đọc title (page.title())
+và kết hợp với các câu expect: await expect(page.URL()).toHaveURL(), ...
++ Xử lý môi trường trang: 
+Xử lý dialog: có thể bắt được các hộp thoại alert, confirm, prompt và tương tác với các hộp thoại này
+Giả lập mạng: nó có thể chặn các request mạng, thay đổi respose trả về hoặc là cho request bị lỗi > Giả lập chạy 
+không cần tương tác với BE > test case chạy nhanh hơn
++ Thực thi mã Typescript: page.evaluate() (Cần học thêm)
++ Chụp ảnh và quay video màn hình: page.screenshot({path: 'screenshot.png'})
+
+Cấu trúc tạo nên Page:
+BrowserType (lõi của trình duyệt: Chromine, Webkit, firefore)
+|
+Browser (Cho chạy trình duyệt đó)
+|
+BrowserContext: Như là 1 profile của Browser nơi giúp lưu trữ các session, cookies, localStorage (Người dùng riêng)
+|
+Page: Tab ở trong browser, mỗi BrowserContect có thể có nhiều page (tab)
+Khi mà chạy test(async({page}) => ) thì pW test runner đã tự động khởi tạo các thông tin trên và inject vào (fixture)
+
+Không chỉ chủ động tạo nên page mà playwright còn chủ động tạo nen các dependencies khác như:
+const toolboxObject = {
+    page: aPageObject,
+    context: aBrowserContext,
+    browser: aBrowserIntance,
+    browserName: 'Chromium',
+    request: anAPIRequestContext,
+    // và nhiều các fixture khác nhưng trong khóa này chủ yếu là các fixture này
+}
+
+Cách dùng fixture như này có ý nghĩa:
++ Rõ ràng và tường minh: Hiểu ngay cần truyền thêm những gì để phục vụ bài test
++ Lịch hoạt, dễ mở rộng: Có thể tạo thêm các fixture phù hợp với nhu cầu của bản thân mà không ảnh hưởng cái cũ
++ Hiệu quả: Chỉ cần tạo ra những cái thứ mình yêu cầu, không khởi taoh bừa phứa gây tốn tài nguyên
++ Sạch sẽ: Thay vì cần khởi tạo từ đầu gây dài hoặc gây lặp code giữa các bài test
+
+
+Bài 2: Cấu trúc Test, Codegen, Annotation
+Codegen là gì: Nó là trình tạo mã giúp tự động viết các lệnh PW tương ứng với các hành động ta thực hiện trên UI
+Từ đó có thể biến các tương tác thủ công thành kịch bản test 
+Codegen ngoài việc hỗ trợ lưu lại các thao tác của người dùng nó còn có thể thêm các assertion
+(Nhưng chỉ dành cho người mới bắt đầu lập trình auto)
+
+Cách tổ chức 1 file tets PW hiệu quả:
+- Cách đơn giản nhất là tạo 1 danh sách toàn các test()
++ Ưu điểm: đơn giản, nhanh chóng 
++ Nhược điểm: Khó bảo trì, không có sự nhóm gộp, có thể gây lặp code
+- Cách gộp các test() trong các test.describe()
++ Ưu điểm: Có thể gộp các test liên quan với nhau thành 1 nhóm, dễ dàng chạy các code chung trước khi vào test nhỏ
+(như là tets.beforeEach trong các test.describe())
+
+Khi chạy npx playwright test thì nó sẽ chỉ tìm và tets các file *.spec.ts (hoặc js) hoặc *.test.ts (do tiêu chuẩn cộng
+đồng đề ra) > giúp thông nhất giữa mọi người với nhau
+Nhưng người dùng hoàn có thể thay đổi đuôi và chạy theo tên mà người dùng mong muốn bằng cách thay đổi cài đặt 
+testMatch trong file playwright.config.ts 
+
+test.step() là gì?
+Nó giống như các bước mô tả các bước nhỏ trong bài test của chúng ta: Chia nhỏ bài test với các mô tả rõ ràng
+Giúp chạy bài test chi tiết hơn, dễ dàng bắt được lỗi xảy ra ở phần nào 
+Ngoài ra có thể thực hiện các hành động có điều kiện như  step.skip(Điều kiện) khi inject step vào async giúp 
+bỏ qua các bước mà vẫn giữ được trạng thái pass của test case
+
+Annotation (chú thích)
+Là các chú thích mà người dùng gắn vào các test case hoặc test.describe để ra lệnh cho Test Runner xử lý
+Có 2 cấp độ: 
++ Cho toàn bộ test() hoặc test.describe()
+test.skip('Tính năng chưa được hoàn thiện', async({page}) => {
+    // Code sẽ không được chạy
+} )
+
+test.describe.skip('Toàn bộ tính năng test cho Admin page', () => {
+    // Tất cả test() bên trong sẽ bị bỏ qua
+})
+
+test('Test giao diện', async({page, browserName}) => {
+    // Nếu không phải webkit thì bỏ qua test này
+    test.skip(browserName !== 'webkit', 'Giao diện này tối ưu cho webkit')
+    // Code cho webkit
+})
+
+test.fail('test case này đang thất bại do bug xyz', async({page}) => {
+    // code gây lỗi
+}) >> Casse này được kì vọng là sẽ fail, khi chạy nếu mà fail thì sẽ tính là pass nhưng nếu chạy ra pass thì lại fail
+
+Ngoài ra còn có:
+test.fixme(description): đánh dấu một test đang bị hỏng và cần được sửa
+test.slow(description): đánh dấu một case cần chạy chậm, nâng thời gian timeout lên 
+test.only(description): chỉ duy nhất test case hoặc nhóm test case này được chạy, tất cả các case khác trong dự án
+sẽ bị bỏ qua
+>> Cảnh bảo: Tuyệt đối không bao giờ commit code chứa test.only và nhánh chính (main/master) vì khi chạy trên CI/CD sẽ
+bỏ qua toàn bộ test case khác
+
++ Cho một test.step() cụ thể bên trong mỗi test:
+test.skip(condition, description): chỉ sử dụng bên trong test.step() và nó sẽ bỏ qua 1 bước cụ thể nào đó khi không
+đáp ứng được điều kiện
+
+Bài 3: Chiến lược lựa chọn Locator: Khi nào dùng getByRole, CSS hay xPath 
+Locator: là bộ chỉ dẫn để tìm và tương tác với một hoặc nhiều phần tử (elements) trên mooth trang web 
+Mọi bước test = Tìm locator > Hành động
+
+Các loại selectors: getByRole, getbyText,.., CSS selectors, xPath
+
+Web accesibility: là việc thiết kế web sao cho những người khuyết tật đều có thể sử dụng: khiếm thính/ khiếm thị
+Trong đó Role chính là 1 thuộc tính cơ bản định nghĩa lên 1 phần từ trong accesibility tree
+
+Vai trò ngầm định (Implicit Role): là chức năng mặc định, mà trình duyệt sẽ tự gán cho thẻ HTML
+Được quy ước theo chuẩn HTML5
+
+Khi viết page.getByRole('button') > PW sẽ tìm tất cả các phần tử có vai trò ngầm định là button (theo DOM) và cả
+nhưng phần tử có vai trò tường minh 
+Ví dụ: thẻ HTML
+<button> : vai trò ngầm định là button > có thể tìm được thông qua: page.getByRole('button')
+<input type = "button">:  vai trò ngầm định là button
+<nav>: vai trò ngầm định là navigation
+<ul>, <ol>: vai trò ngầm định là list
+
+Vai trò tường minh (Explicit Role) sử dụng bộ tiêu chuẩn ARIA 
+giúp dán nhãn lên các element để đánh dấu đây là cái ghế/ đây là cái bàn bằng cách thêm thuộc tính Role
+Vài trò tường minh: là vai trò được gán một cách rõ ràng, trực tiếp cho một phần tử thông qua thuộc tính role=""
+ví dụ: 
+<div class="custom-button" role="button" tabindex="0">
+
+    Đăng ký ngay
+
+</div>
+
+Quy tắc vàng: Vai trò tường minh (từ ARIA) sẽ ghi đè vai trò ngầm định của thẻ HTML
+và công cụ tốt nhất để xác định vai trò cuối cùng của một phần tử chính là tab Accessibility trong devtool
+và khi đó getByRole sẽ theo role ở trong tab này để tìm kiếm các element
+
+Vậy khi getByRole thất bại thì ta nên chuyển sang ? > getbyLabel
+Chỉ có thể sử dụng với các phần tử trong form như: <input>, <textarea>
+Ví dụ:
+<label for="user-email">Địa chỉ email:</label>
+<input type="email" id="user-email">
+Playwright Test:
+await page.getByLabel('Địa chỉ email:').fill('test@example.com');
+
+tiếp đó có thể xem có thể dùng getByPlaceholder() không ? 
+nếu nó là một ô nhập liệu và có dòng chữ gợi ý bên trong thì cách này rất hiệu quả
+
+tiếp theo có thể xem dùng được getByText()
+với các dạng phần tử không phải dạng form (<div>, <span>, <p>), mà dùng với các dạng nút bấm/ liên kết
+khi đó có thể tìm được tất cả các thứ gì mà người dùng có thể nhìn thấy bằng mắt
+
+nếu phần tử đó là dạng hình ảnh thì có thể dùng: getByAltText()
+Nó sẽ tìm các thẻ <img> dựa vào thuộc tính alt (văn bản thay thế)
+
+đối với các dạng icon hoặc nút mà có tooltip khi di chuột vào, ta có thể dùng getByTitle()
+
+cuối cùng: Hạ sách có thể dung getByTestid(): nhưng cần phải nhờ dev thêm
+
+sau đó nếu những cách trên không được thì có thể chuyển sang dùng CSS selectors và xPath
+
+CSS selector là phương thức tìm kiếm phần tử dựa trên:
+ID: #id > Mức độ ưu tiên cao nhất
+Thuộc tính (Attribute): [attr="value"] > cao
+Class: .class > Trung bình
+Tên thẻ (tag): tagname > Thấp
+Decendant (con cháu): A B > Thấp
+Child: A > B > Rất thấp (dễ đứt gãy)
+Pseudo-class: :nth-child(n), :hover (khi di chuột), :first-child > Rất thấp (dễ đứt gãy)
+Pseudo-class (trạng thái element) giúp test các trạng thái tương tác (hover, focus, disbale)
+
+Xử lý thuộc tính động: 
+Bắt đầu với (^): tìm phần tử có id bắt đầu bằng 'user-'
+const userRow = page.locator("[id^='user-']");
+Chứa (*): Tìm phần tử có id chứa '-profile-'
+const profileSection = page.locator("[id*='-profile-']");
+Kết thúc với ($): Tìm phần tử có id kết thúc bằng '-btn'
+const actionButton = page.locator("[id$='-btn']");
+
+Chiến lược: 
+Quy tắc 1: Ưu tiên các định danh ổn định
+ID > data-testid > Các thuộc tính (name, type, placeholder) > class ngữ nghĩa > Tên thẻ
+Quy tắc 2: Giữ selector ngắn và độc lập
+Selector càng dài và phụ thuộc vào cấu trúc HTML thì có càng nhiều điểm gây đứt gãy
+(dài nhưng đủ thì ok, nhưng dài mà thừa các thông tin không cần thiết sẽ gây hại)
+Quy tắc 3: Tìm các mỏ neo
+Với trường hợp phần tử tìm kiếm không có đặc điểm gì đặc biệt thì cần tìn các phần tử xung quanh
+(Hàng xóm, cha, mẹ)
+
+Tại sao nối chuỗi lại tốt? 
+Dễ đọc: Mỗi bước là một hành động logic riêng biệt (tìm kiếm được các locator cụ thể, chứ không
+phải ghi luôn 1 dòng selector dài ngoằng)
+Tái sử dụng: Có thể sử dụng locator của element to (mỏ neo) để tìm các phần tử khác gần đó
+Dễ gỡ lỗi: Nếu test thất bị thì có thể xác minh lỗi từ phần nào
+
+
+xPath: Công cụ tìm kiếm locator tốt hơn CSS
+Nhược điểm của CSS là nó chỉ có thể đi xuống để tìm con cháu, nhưng xPath có thể di chuyển theo
+mọi hướng trên cây DOM: lên cha, xuống con, ngang anh email
+
+Các ký tự cơ bản:
+//: (Dùng nhiều nhất) "Tìm ở bất kỳ đâu trong tài liệu": ví dụ //button ( tìm tất cả nút bấm)
+/ : Tìm từ gốc tài liệu, hoặc tìm con trực tiếp
+. : Đại diện cho "nút hiện tại"
+..: Di chuyển lên phần tử cha
+* : Đại diện cho bất cứ thẻ nào, ví dụ //*[@id='main'] (Tìm bất cứ phần tử nào có id='main')
+
+Các hàm thường xuyên được sử dụng:
+Tìm theo  thuộc tính: //input[@name='email']
+
+tìm theo text - chính xác: //button[text()='Read'] — nút có text CHÍNH XÁC "Read"
+chỉ tìm được các element chứa đoạn text này không áp dụng cho phần tử con của nó
+//button[contains(@class,'btn-primary')] — nút có class chứa "btn-primary"
+tìm phần tử chứa text: //div[contains(.,'iPhone 15')] — ✅ Tìm được div chứa "iPhone 15"
+//span[starts-with(text(),'Wel')] — mọi span bắt đầu bằng "Wel"
+
+//button[text()='Thêm vào giỏ']/.. — lấy div cha của nút "Thêm vào giỏ"
+> nhưng không quan tâm đến cấu trúc (thẻ cha)
+//button[text()='Thêm vào giỏ']/parent::div — tương tự như trên, nhưng rõ ràng hơn
+> cần đảm bảo cấu trúc HTML cụ thể
+//button[text()='Thêm vào giỏ']/../@data-id — lấy GIÁ TRỊ thuộc tính data-id của thẻ cha
+
+//li[text()='Item 1']/following-sibling::li — các li sau "Item 1" (Item 2, Item 3)
+//span[text()='First']/following-sibling::span[1] — span ngay sau "First" (Second)
+
+//span[text()='Deep nested text']/ancestor::div — tất cả div tổ tiên của span
+//div[@class='menu']/descendant::a — tất cả thẻ a con/cháu của div.menu
+//div[@class='menu']//a — tương đương với descendant::a
+
+// Lưu ý cần có tiền tố 'xpath=' khi dùng XPath trong .locator() nối chuỗi.
+
+trong xPath thì dấu / mang nhiều ý nghĩa chứ không phải chỉ mỗi 1 ý nghĩa là đi đến con trực 
+tiếp:
+- Nếu step sau / là tên thẻ > nó sẽ là tìm thẻ con trực tiếp
+- Nếu sau nó là nên của attribute thì > lấy giá trị thuộc tính
+- Nếu sau nó là preceding-sibling::li > lấy tất cả các thẻ li (cùng cấp) phía trước
+- Nếu sao nó là parent::div thì > tìm kiếm cha trực tiếp là div
+
+Mặc dù xpath có thể xử lý tất cả các loại locator NHƯNG với ý nghĩa cao nhất là dễ đọc, Dễ
+hiểu và dễ sửa thì nên cần kết hợp với các hộp đồ nghề khác: Pseudo-class
+:has-text("text") > người tìm kiếm văn bản
+-có thể tìm kiếm chuỗi con (substring)
+- không phân biệt chữ hoa chữ thường
+- bỏ qua khoảng trắng thừa
+- tìm kiếm sâu vào các phần tử con cháu bên trong
+> Nên sử dụng thường xuyên
+
+:has(selector) > Người tìm kiếm cấu trúc
+- Tìm một phần tử nếu chó chứa 1 phần tử con cháu khác khớp với selector bên trong
+> Nên sử dụng khi đặc điểm nhận diện không phải là text mà là một phần tử cụ thể
+// VD tìm mục danh sách (li) có class là 'user-item' và CÓ CHỨA một span với class 'admin-badge'
+const adminUserItem = page.locator('li.user-item:has(span.admin-badge)');
+
+Một công cụ mạnh mẽ khác có chức năng tương tự (và hơn cả pseudo-class) là: phương thức .filter()
+Đây là cách làm xử lý chuỗi selector dài: Chọn một nhóm lớn > Lọc ra các cá thể > Hành động
+trên các cá thể đó
+.filter({hasText: ''}) tương đương :has-text()
+.filter({has: ''}) tương đươnh :has()
