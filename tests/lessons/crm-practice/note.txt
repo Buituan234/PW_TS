@@ -1008,3 +1008,15 @@ schedule:
   3: ngày trong tháng (1-31)
   4: tháng (1-12)
   5: thứ trong tuần (0-6) chú ý 0 là chủ nhật, 1 là thứ 2, 2 là thứ 3, ...
+
+
+  học thêm clientSightRendering và ServersightRendering
+
+  lọc trạng thái thì cần cmt cẩn thận để dễ hiểu
+  select.first()
+  select.nth(1)
+
+  //
+  page.locator('div').filter({hasText: 'Lọc trạng thái}).locator('select')
+  hoặc
+  page.getByText('Lọc trạng thái').locator('xpath=following-sibling::select')
