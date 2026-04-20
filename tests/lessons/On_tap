@@ -1,3 +1,34 @@
+Các thao tác chuỗi hay dùng:
+trim(): bỏ khoảng trắng thừa ở đầu và cuối chuỗi
+includes(): kiểm tra chuỗi có chứa một đoạn text nào đó không
+replace(): trả về 1 chuỗi kí tự mới và thay phần tử đầu tiên nó tìm được
+replaceAll(): trả về 1 chuỗi kí tự mới và thay tất cả các phẩn tử nó tìm được
+length(): lấy độ dài chuỗi
+toLowerCase()/ toUpperCase(): chuẩn hóa chữ hoa, chữ thường trước khi so sánh
+
+Sử dụng push() và pop() để thêm và xóa phần tử cuối cùng ở trong mảng
+
+array.map(): dùng để biến đổi dữ liệu của 1 mảng (base) để tạo ra 1 mảng mới
++ Nó sẽ duyệt qua các phần tử của mảng base
++ gọi callback cho mỗi phần tử
++ lấy giá trị return và gom lại thành 1 mảng mới
+
+array.filter(): dùng để lọc dữ liệu
++ chỉ giữ lại các phần tử thỏa mãn điều kiện và gon lại thành 1 mảng mới
+
+arrar.include(): Kiểm tra mảng có tồn tại phần tử không
++ Trả về true/false
+
+array.find(): Tìm phẩn tử của mảng thỏa mãn điều kiện
++ Trả về giá trị phần tử (str/num/obj) đầu tiên của mảng thỏa mãn điều kiện
++ Khác với filter là filter sẽ lấy tất cả các phần tử thỏa mãn điều kiện 
+
+object.keys(): trả về 1 mảng có các phần tử là các key của object
+object.value(): Trả về 1 mảng có các phần tử là các giá trị (của key) trong object
+object.entris(): trả về 1 mảng có các phẩn tử là các mảng con 
+bao gồm 2 giá trị key và value: [key, value]
+
+
 Bài 1: Tìm hiểu khái niệm cốt lỗi 
 Các chức năng của Page có thể thực hiện:
 + Điều hướng: page.goto(), page.goBack(), page.goForward(), page.reload()
@@ -234,7 +265,7 @@ tiếp:
 - Nếu sao nó là parent::div thì > tìm kiếm cha trực tiếp là div
 
 Mặc dù xpath có thể xử lý tất cả các loại locator NHƯNG với ý nghĩa cao nhất là dễ đọc, Dễ
-hiểu và dễ sửa thì nên cần kết hợp với các hộp đồ nghề khác: Pseudo-class
+hiểu và dễ sửa thì nên cần kết hợp với các hộp đồ nghề khác: Pseudo-selector của PW
 :has-text("text") > người tìm kiếm văn bản
 -có thể tìm kiếm chuỗi con (substring)
 - không phân biệt chữ hoa chữ thường
