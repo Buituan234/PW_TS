@@ -343,3 +343,73 @@ value của cả 2 object và so sánh với nhau (cả các object và array l�
 - expect(object).toHaveProperty(keyPath, value?): Kiểm tra sự tồn tại của thuộc tính key và
 tùy chọn, kiểm tra cả giá trị của thuộc tính đó
 - expect(array).toHaveLength(number): Kiểm tra độ dài của mảng
+
+
+Bài 6: Tương tacc chuột và bàn phím
+Actionablity: khi thực hiện hành động liên quan đến con trỏ (click()), pw sẽ thực hiện các bước
+kiểm tra trước: đảm bảo có element tồn tại (trên DOM) > chờ element hiển thị > chờ element 
+ngừng di chuyển > chờ element vào tầm nhìn (scroll) > chờ element không bị che khuất > và thử
+lại các bước nếu element bị gỡ khỏi DOM > nếu pass thì mới click
+
+Các action click cơ bản:
++ click(): click tiêu chuẩn
++ dbclick(): double click
++ rightClick hoặc click({button: 'right'})
++ click({modifiers: ['Shift']}): ngoài ra có thể nhấn nút 'Control', 'Alt', 'Meta' trên Mac 
+để mô phỏng hành động vừa nhấn giữ vừa click
++ click({position: {x: 150, y: 100}})
++ click({force: true}): click mà bỏ qua tiêu chuẩn actionability
+
+Mô phỏng bàn phím:
++ press('Enter'): nhấn nút Enter
++ press('a'): Nhấn phím a 
++ press('Control+ArrowRight'): Nhấn tổ hợp phím ctrl + mũi tên phải
+Điểm khác nhau giữa fill và press là fill chỉ quan tâm đến nội dung input của ô (set value)
+còn press thì thường dùng để check các sự kiện khi nhấn thông tin trên bàn phím/ chức năng
+của phím tắt: xem có tự động gợi ý khi nhập từng chữ cái/ thử xem có nhận phím enter không
++ pressSequentially(text): mô phỏng hành động gõ từng kí tự của con Người
+await page.locator('input').pressSequentially('Hello', { delay: 100 });
+
+
+Bài 7: Xử lý checkbox và Radio, Dropdown và Dialog(Alert & Modal)
+vì tránh trường hợp ô đã được check/ không được check và người dùng click() > flaky
+thì PW cung cấp các action chuyên hỗ trợ về việc xử lý Checkbox và Radio
++ locator.check(): đảm bảo ô được check
++ locaor.uncheck(): đảm bảo ô bị bỏ check
++ locato.setChecked(boolean): cả 2 phương thứ trên trong 1
+nhưng với trường hợp Radio: khi thực hiện: locator.setChecked(false) trong khi nó đã được chọn
+thì sẽ gây ra false bởi vì không thể uncheck 1 raido đã được check
+
+Chỉ áp dụng với các thẻ HTML tiêu chuẩn của checkbox/radio hoặc là các element tuân thủ tiêu
+chuẩn ARIA (role="checkbox")
+
+Dropdowns: thường sẽ có 2 loại chính: <select> (HTML gốc) và 
+custom dropdown(làm bằng <div> và JS)
+- Loại 1: Dropdown HTML gốc <select>: PW cung cấp hàm chuyên dụng locator.selectOption()
+cách nhận biết là thấy thể <select> và <option> trong DOM
+- Loại 2: Custome Dropdown: tạo bằng thẻ <div>, <span>, <input>
++ Click và chọn
++ Gõ và enter (nếu hỗ trợ tìm kiếm)
++ Xử lý bằng scroll: click vào xong sẽ scroll theo trục y
+nếu dùng scrollIntoViewIfNeed thì không thể sử dụng cho infinity scroll vì quy tắc là nó sẽ
+tìm element đó trong DOm trước xong sau đó mới cuộn xuống, nhưng với infinity scroll thì các
+element ở bên dưới sẽ khoogn xuất hiện ngay từ đầu mà phải scroll xuống dần thì nó mới hiển thị
+do đó scrollIntoViewIfNeed sẽ khoogn chạy mà chỉ chờ đến khi timeout rồi báo fail
+
+Xử lý Alerts, Modal và Dialog
+> Đây là sự kiện ở ngoài DOM, không thể dùng locator để tìm các element mà phải dùng trình 
+lắng nghe sự kiện page.on('dialog', ...)
+- Xử lý window.alert (Chỉ có nút "OK"):
+Quy tắc: Lắng nghe trước và hành động sau > vì dialog này chặn (block) trang, nên cần lắng nghe
+trước khi click vào nút gây ra dialog
+  page.on('dialog', async dialog => {
+    await dialog.accept();
+  });
+- Xử lý window.confirm (có button "OK" và "Cancel"): thì bây giờ cũng sẽ xử lý như trên nhưng
+sẽ có 2 option: dialog.accept() (OK) hoặc dialog.dismiss() (Hủy).
+- Xử lý window.prompt (nhập văn bản): cho phép bạn accept() (OK) với 1 giá trị văn bản hoặc
+dismiss() (Hủy)
+
+Với các loại HTML modal: tức là chúng nằm trong DOM thì ta xử lý chúng như element HTML khác
+bằng Locator: Nhấn vào nút để mở modal > dùng expecct(modal).toBeVisible > CLick ĐÓng hoặc OK
+> DÙng expect(modal).not.toBeVisible (đảm bảo modal biến mất)
