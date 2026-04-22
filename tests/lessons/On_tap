@@ -284,3 +284,62 @@ Một công cụ mạnh mẽ khác có chức năng tương tự (và hơn cả 
 trên các cá thể đó
 .filter({hasText: ''}) tương đương :has-text()
 .filter({has: ''}) tương đươnh :has()
+
+Bài 4: Auto-Waiting, Web-first assertion 
+Auto-waiting: sẽ tự động chờ cho đến khi một phân tử đã sẵn sàng để có thể tương tác trước khi
+thực hiện hành động (đã được gắn vào DOM, visible, stable, enable)
+
+Có 3 phương pháp chờ đợi của PW:
+- Chờ đợi ngầm trên hành động: .click(), .fill(), .check(), .press()
+- Chờ đợi tường minh với "web-first assertions": .tobeVisible(), toHaveText()
+Đảm bảo trạng thái này là đúng trước khi thực hiện các bước tiếp theo
+- Chờ đợi sự kiện chuyên dụng: page.waitForResponse(), page.waitForURL()
+Sử dụng kịch bản test với API hoặc điều hướng trang phức tạp
+
+Thời gian chờ phụ thuộc vào timeout người dùng cài đặt
+
+Web-first assertion giúp chuyển đổi từ quy trình 2 bước: bước lấy dữ liệu + bước assert dữ liệu
+thành chỉ cần 1 bước là chờ đợi đến khi dữ liệu như assertion 
+
+Việc dùng webf-first assertion giúp:
++ Tránh flaky test: loại bỏ các lỗi liên quan đến thời gian
++ Code ngắn gọn, dễ đọc
++ Giúp tư duy như cách người dùng thực hiện
+
+Danh sách các Web-Fist assertion phổ biến: 
+- Trạng thái và tồn tại (State và Exitence): .tobeVisible(), .tobeHidden(), tobeEnable(): kiểm
+tra phần tử không có thuộc tính disable, tobeDisable(), tobeChecked(), tobeEmpty
+- Nội dung và thuộc tính (Content và attribute): Kiểm tra văn bản, giá trị, thuộc tính HTML
+.toHaveText(), toContainText(), toHaveValue(), .toHaveAttribute(name,value), toHaveClass
+- Trang (Page assertion): Kiểm tra trạng thái của trang: .toHaveURL(), toHaveTitle() dùng để 
+kiểm tra title của trang
+
+Bài 5: Kỹ thuật tìm kiếm phần tử text và assertion
+LẤY dữ liệu phần tử:
+- textContent(): lấy nội dung text thô của 1 phần tử và tất cả các con cháu của nó nối thành
+1 chuỗi, nó sẽ lấy cả text ẩn (display: none), không thêm khoảng trắng hay xuống dòng
+- innerText(): lấy nội dung text người dùng nhìn thấy trên trang đã được render, bỏ qua text ẩn,
+cố gắng giữ lại các dấu xuống dòng và khoảng trắng hợp lý giữa các khối văn bản
+- innerHTML(): lấy toàn bộ chuỗi mà HTML nằm bên trong phần tử được chọn, bao gồm thẻ con
+- getAttribute(): trả về giá trị dưới dạng chuỗi (string) hoặc null nếu không tồn tại
+- inputValue(): lấy giá trị hiện tại của các phần tử form như <input>, <textarea>, <select>
+- allTextContents(): Lấy textContent của từng phần tử của các mục trong 1 danh sách
+- allInnerTexts(): lấy innertext của từng phần tử
+
+Khẳng định giá trị tức thời:
+- tobe(value): SO sánh bằng tuyệt đối giống như ===, nó kiểm tra dữ liệu và kiểu dữ liệu
+- toEqual(value): so sánh dùng cho object và array, so sánh các giá trị bên trong và kiểm 
+tra thuộc tính hoặc phần tử
+giả sử có 2 object giống hệt nhau mà so sánh qua tobe() thì sẽ trả về fail vì chúng là 2 obj 
+khác nhau trong bộ nhớ
+- toContain(item): dùng để kiểm tra các string[] hoặc string xem có chứa đoạn văn bản không
+- toContainEqual(item): dùng so sánh sâu khi muốn kiểm tra sự tồn tại của object trong mảng
+- tobeTruthy()/ tobeFalsy(): Kiểm tra tính đúng sai theo boolean
+- toBeGreaterThan()/ tobeLessThan: như so sánh >, < toán học
+
+Kiểm tra bject và Array với expect
+- expect(object).toEqual(expectedObject): So sánh sâu nội dung object, đi vào từng cặp key,
+value của cả 2 object và so sánh với nhau (cả các object và array lồng nhau)
+- expect(object).toHaveProperty(keyPath, value?): Kiểm tra sự tồn tại của thuộc tính key và
+tùy chọn, kiểm tra cả giá trị của thuộc tính đó
+- expect(array).toHaveLength(number): Kiểm tra độ dài của mảng
