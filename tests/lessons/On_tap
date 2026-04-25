@@ -354,3 +354,64 @@ dismiss() (Hủy)
 Với các loại HTML modal: tức là chúng nằm trong DOM thì ta xử lý chúng như element HTML khác
 bằng Locator: Nhấn vào nút để mở modal > dùng expecct(modal).toBeVisible > CLick ĐÓng hoặc OK
 > DÙng expect(modal).not.toBeVisible (đảm bảo modal biến mất)
+
+
+Bài 8: Làm chủ kỹ thuật: File, Frames, Shadow DOM
+Hầu hết các trang web hiện tại đều giả mạo nút upload, ẩn nút thật đi và hiển thị nút khác 
+thay thế đẹp hơn bởi vì thẻ <input type="file"> xấu và không tùy chỉnh được
+> Nếu click vào button ảo thì sẽ mở cửa sổ file của hệ điều hành (file explorer) nhưng mà PW 
+không thể điều khiển được cửa sổ này
+
+Cách upload file đúng là sử dụng: setInputFiles()
+> Nó sẽ bypass qua các bài kiểm tra actionability (enable, visible) mà gán ngay file cho 1 locator
+bị ẩn và phớt lời đi locator giả
+await page.locator('#file-input').setInputFiles('path/to/my-file.jpg');
+Muốn upload nhiều file thì cũng dùng cú pháp này nhưng sẽ truyền vào 1 mảng
+await page.locator('#real-input').setInputFiles([
+    'path/to/file1.jpg',
+    'path/to/file2.jpg'
+])
+Khi muốn xóa các file đã upload thì truyền 1 MẢNG RỖNG
+
+Trong trường hợp không thể xác định được thẻ <input type="file"> hoặc không có thẻ này thì sẽ
+dùng chiến lược chờ sự kiện 'filechooser' (lắng nghe trước hành động sau)
+> Đăng ký sự kiện 'filechooser' > Thực hiện hành động click vào nút ảo > Lấy kết quả từ sự kiện
+
+Download file: cũng thực hiện theo quy tắc lắng nghe trước, hành động sau
+> Đăng ký sự kiện download: (page.waitForEvent('download')) > Click vào nút download > Lấy ra Kết
+quả của sự kiện chờ (await ...)
+
+Shadow DOM: là một DOM con được đóng trong 1 element (host), nó giúp đảm bảo CSS được cô lập -
+css ở trang chính (global) không thể rò rỉ vào bên trong, JS được cô lập - JS từ trang chính không
+thể truy vấn vào bên trong
+
+Có 2 mode: open (phổ biển) và closed (hiếm)
+open: cho phép JS từ bên ngoài có thể NHÌN vào bên trong
+closed: JS bên ngoài không thể truy cập, trả về null
+
+Với trường hợp Shadow DOM - open: thì PW có thể tự động xuyên qua, có thể viết locator như bthg
+VỚi trường hợp Shadow DOM - closed: PW không thể nhìn được vào bên trong, mà chỉ có thể tương tác
+với host (element chứa shadow DOM), có cách có thể tương tác bằng việc evaluate nhưng ko khuyến k 
+
+Iframes (Khung nội tuyến): thẻ <iframes> dùng để nhúng 1 trang web khác vào bên trong trang web
+hiện tại, nó là 1 window riêng biệt, 1 document riêng biệt
+Khonong thể nào "với tay" vào bên trong iframes (vì nó là 1 document khác) để lấy element, phải 
+nhảy qua cửa sổ đó trước. VD: Quảng cáo, cổng thanh toán, video YTB
+
+Vì <iframe> là một document khác, page.locator() không thể thể láy được element (chỉ tìm trong
+element chính) > DO đó phải dùng page.frameLocator() để chuyển ngữ cảnh vào trong iframe
+
+Để xử lý các locator bên trong các iframme:
+B1: cần trỏ được đến các iframe đó (page.frameLocator('')): qua ID, title, hoặc là nth()
+B2: dùng locator chain để chain từ iframe đó vào các element bên trong
+
+Phát hiện ảnh hỏng: chúng ta không thể phát hiện 1 ảnh trên trang bị hỏng hay không qua
+await expect('').toBeVisible
+Vậy nên để có thể xác định ảnh bị lỗi hay không ta có những cách sau:
++ Dựa vào đoạn text mà dev cung cấp: 'Error' hoặc 404
++ Nếu UI không có text báo lỗi thì dùng page.evaluate() để kiểm tra thuộc tính ẩn của thẻ <img>
+đó là img.complete, img.naturalWidth > 0, img.naturalHeigh > 0 (chiều rộng và cao ảnh > 0)
++ Chờ network response: dùng response để check có ok() không ? (status 200)
++ Quét toàn bộ ảnh trên trang: dùng page.evaluate() để lặp qua các document.images (danh sách
+tất cả các ảnh của trình duyệt) và áp dụng cách 2 để check
+//Array.from(document.images) > lấy tất cả các ảnh của trình duyệt
