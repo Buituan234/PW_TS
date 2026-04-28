@@ -474,3 +474,73 @@ Vậy nên để có thể xác định ảnh bị lỗi hay không ta có nhữ
 + Quét toàn bộ ảnh trên trang: dùng page.evaluate() để lặp qua các document.images (danh sách
 tất cả các ảnh của trình duyệt) và áp dụng cách 2 để check
 //Array.from(document.images) > lấy tất cả các ảnh của trình duyệt
+
+
+Bài 9: Dùng evaluate() và xử lý Widgets (lịch và bảng)
+- Evaluate() là phương thức thực thi Javascript code trong Browser context (bên trong trang web)
+giống như gõ các lệnh trong console Của devtool
+Dùng để lấy các dữ liệu data hoặc thực thi các logic mà không thể làm bằng pw thông thường
+
+Có thể gọi evaluate từ page hoặc locator
+
+Nguyên tắc vàng: Nếu playwright có các hàm gốc (native method) thì hãy dùng nó vì các hàm gốc
+có cơ chế auto waiting, chờ đến khi element sẵn sàng 
+Còn evaluate() thì sẽ không chờ nó chạy ngay lập tức, nếu gọi evaluate trước khi element xuất
+hiện thì test sẽ flaky
+Ví dụ: khi muốn lấy textContent, input value, attribute, checked?
+thì thay vì cứ phải await loc.evaluate(el => el.textContent) 
+thì có thể dùng native: await loc.textContent()
+
+Các trường hợp bắt buộc cần dùng evaluate
+- ĐỌc các thuộc tính DOM không hỗ trợ: srollTop, scrollHigh, clientHigh (thường dùng để check
+xem người dùng đã cuộn xuống cuối hay chưa)
+- Đọc computed styles (CSS đã tính toán)
++ Lấy màu nền (background-color) chính xác
++ Tối ưu hóa khi đọc nhiều thuộc Tính: ví dụ 1 muốn lấy giá trị của 3 atrribute của 1 element
+thì thay vì ta await 3 lần để lấy được 3 giá trị thì có thể dùng evaluate để lấy ra cả 3 giá
+trị của attribute 1 lúc (giúp giảm thiểu độ trễ mạng) vì mỗi lần await là 1 lệnh khứ hồi
+(round trip) đi từ node.js lên trình duyệt, việc này tốn thời gian
++ Có thể giúp ghi đè vào các imput mà không thể fill bằng locator.fill
+
+- Khi sử lý Date picker (công cụ chọn lịch) thì chúng ta có 2 chiến lược:
++ Chiến lược mù quáng (kém hiệu quả hơn): Sẽ click "Next" hoặc "Prev" lặp đi lặp lại và trong
+mỗi vòng lặp sẽ đọc text của tháng/năm trên UI để so sánh đã đúng chưa
+> Sẽ phải thực hiện hành động click và read nhiều lần > chậm
++ Chiến lược tính toán trước (Hiệu quả hơn): Sử dụng thư viện chuyên dụng cho date (date-fns)
+rồi tính toán số lần cần click trước khi tương tác với UI
+
+Các hàm date-fns hay dùng:
++ parse(ymd,'yyyy-MM-dd',...): dịch
+Lấy 1 chuỗi string như "2025-10-29" và "dịch" (parse) nó thành một đối tượng Date thât mà máy
+tính hiểu Được
++ isValid(parsed): Kiểm tra
+Kiểm tra xem kết quả của parse có phải là một ngày hợp lệ không (ví dụ "2025-02-30 là ko")
++ startOfMonth(date): Reset về đầu tháng
+Lấy một ngày bất kỳ (2025-10-29) và trả về đối tượng Date của ngày đầu tiên trong tháng đó
+(2025-10-01)
++ differenceInMonth(targetDate, currentDate): đo chênh lệch
+targetDate - currentDate > tính toán xem có bao nheieu tháng chênh lệch giữa 2 ngày
+differenceInMonth('2025-03-01','2025-01-01') > trả về 2 
++ getMonth(pared) / getYear(pared): lấy thông tin
+lấy số tháng (0-11) hoặc số năm từ đối tượng Date, ở đây tháng thật sẽ bị lùi đi 1
+
+- Chiến lược xử lý table 
++ Chiến lược 1: lấy tất cả dữ liệu > dùng vòng lặp for để loop qua tất cả các row và tất cả
+các cell của row để lấy dữ liệu sau đó tạo thành 1 mảng tát cả các giá trị của bảng
+> Cách làm này thì dễ hiểu và dễ làm nhưng phải hard code các index của cột nếu UI/UX thay
+đổi thì lại phải đi tìm lại code và sửa, với những bảng dữ liệu lớn thì quá trình await trong
+mỗi lần loop cũng sẽ tốn rât nhiều thời gian
++ Chiến lược 2: Lọc hàng và ánh xạ cột 
+B1: Không hard code vị trí các cột mà "Đọc" tiêu đề các cột 1 lần duy nhất và tạo ra "bản đồ"
+về vị trí của chúng
+{
+    'Project': 0,
+    'Client': 1,
+    'Priority': 2
+}
+B2: Giải quyết hàng nào (áp dụng bản đồ)
+Cách 1: Có thể đối chiếu đến 1 hàng (nhanh nhất) nhờ việc sử dụng filter
+ví dụ fiter đến 1 hàng có Project là Appolo và Priority là High > kẹp thêm .nth(cột)
+là sẽ ra vị trí cell mong Muốn
+Cách 2: hoặc thu thập thông tin toàn bộ bảng table mà không cần dùng hard code nth(0)/nth(1)
+mà thay vào đó là truyền các giá trị trong "bản đồ" mới tạo ra ở b1
