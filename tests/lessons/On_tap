@@ -544,3 +544,33 @@ ví dụ fiter đến 1 hàng có Project là Appolo và Priority là High > k�
 là sẽ ra vị trí cell mong Muốn
 Cách 2: hoặc thu thập thông tin toàn bộ bảng table mà không cần dùng hard code nth(0)/nth(1)
 mà thay vào đó là truyền các giá trị trong "bản đồ" mới tạo ra ở b1
+
+Bài 10: POM: Nguyên tắc và Cấu trúc nền tảng trong PW
+Page object modal là mẫu thiết kết (design pattern) giúp biểu đạt các nguyên tắc "Tách biệt
+trách nhiệm" khi chạy kiểm thử tự động.
+Phân chia 2 lĩnh vực khác nhau trong khung kiểm thử (Kịch bản test) và (Page object)
+
+Việc áp dụng POM giúp giải quyết 3 việc: dễ bảo trì, tái sử dụng và khả năng đọc Hiểu
+- Dễ bảo trì: ví dụ nếu dev FE thay đổi 1 element thì ta chỉ cần vào phần Page object để cập
+nhật Locator chứ không phải đi dò lại từng file test để sửa
+- Tái sử dung: có 2 cấp độ phương thức trong Page object: (Phương thức nguyên tử) và (Phương thức
+phân tử), nguyên tử là tương tác trực tiếp với 1 element, còn phân tử là 1 hành vi nghiệp vụ 
+được tổng hợp từ các phương thức nguyên tử
+- Tính dễ đọc: các page, chức năng được đặt tên từ trước ở page object giúp đưa vào file test 
+sẽ dễ đọc hơn, kể cả với người nontech
+
+BasePage: là một class cha, mà tất cả các Page Object khác có thể kế thừa, nó không đại diện cho
+trang cụ thể nào mà đại diện cho các hành vi chung, mà người dùng cũng có thể thực hiện ở trang
+bất kì
+- Nếu 1 hành động hoặc 1 thành phần có thể sử dụng hoặc thực hiện từ nhiều trang độc lập, ví dụ
+như tính năng đăng xuất trên header thì có thể sử dụng trong BasePage
+- Nếu 1 thành phần hoặc hành động mà chỉ có thể thực hiện ở các page riêng biệt thì không nên
+đưa vào BasePage
+Ví dụ về các thành phần trong BasePage:
+- Locator: Header, footer, Menu điều hướng, Avatar người dùng, nút logout, thanh tìm kiếm, giỏ
+hàng
+- Hành động: clickLogoToHome(), search(text), openUserMenu(), getCartItemCount()
+
+Với BasePage làm nền tảng thì ta có thể tiếp tục xây dựng các Page Object khác bằng cách sử dụng
+tính kế thừa trong hướng đối tượng (OOP)
+Class con kế thừa từ BasePage và bổ sung thêm các locator cũng như hành vi trên trang đó
