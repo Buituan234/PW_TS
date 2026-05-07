@@ -667,3 +667,33 @@ combo keyof typeof thường được sử dụng để lấy ra các key trong 
 dùng (ví dụ nó sẽ gợi ý các Locator mà có thể trỏ tới trong page)
 Việc kết hợp keyof typeof và as const: thì as const sẽ giúp giữ nguyên các value của 1 obejct và không
 thể bị thay đổi từ bên ngoài > khi đó lấy việc lấy value của 1 object sẽ an toàn hơn
+
+Closure: Khi một hàm con được khai báo bên trong 1 hàm cha và nó sử dụng các biến của hàm cha, khi gọi 
+hàm cha và chạy xong hàm cha thì hàm con vẫn có thể truy cập và sử dụng lại biến trong hàm cha
+> Closure là sự kết hợp giữa 1 hàm và môi trường nơi nó được khai báo > Cho phép nó truy cập vào scope 
+của hàm cha ngay cả khi hàm cha thực hiện xong
+> Ví dụ kinh điển là hàm counter
+function createCounter() {
+    let count = 0; // Biến này nằm trong hàm cha (Local scope)
+    // Hàm con được return ra ngoài
+    return function() {
+        count++; // Hàm con dùng biến count của cha
+        console.log("Current count:", count);
+    };
+}
+// 1. Chạy hàm cha. Lúc này createCounter chạy xong,
+// Lẽ ra biến `count` phải bị hủy.
+const myCounter = createCounter();
+// 2. NHƯNG KHÔNG! myCounter vẫn nhớ `count` nhờ Closure.
+myCounter(); // Output: Current count: 1
+myCounter(); // Output: Current count: 2
+myCounter(); // Output: Current count: 3
+Nếu khai báo 1 biến mới từ hàm createCounter thì sẽ đếm lại từ đầu, vì nó là môi trường MỚI
+> Closure giúp đảm bảo giữ nguyễn được giá trị gốc count = 0 khi mà muốn thay đổi nó phải dùng tới hàm
+con thay vì khai báo let count = 0 ở bên ngoài như thường thì biến count có thể bị thay đổi ở bất kỳ đâu
+
+Chú ý phân biệt: Nếu thấy => trong PW cần biết phân biệt Được
+Nếu nó nắm sau dấu hai chấm ":" hoặc trong type ... = , nó ám chỉ type của Biến
+Nếu nó nằm sau dấu bằng trong code logic thì nó là hàm thực thi
+
+Cách xử lý bảng (table) trong PW:
