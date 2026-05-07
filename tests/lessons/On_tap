@@ -574,3 +574,96 @@ hàng
 Với BasePage làm nền tảng thì ta có thể tiếp tục xây dựng các Page Object khác bằng cách sử dụng
 tính kế thừa trong hướng đối tượng (OOP)
 Class con kế thừa từ BasePage và bổ sung thêm các locator cũng như hành vi trên trang đó
+
+
+Bài 11: Chiến lược POM nâng cao: Quản lý Assertions, tránh phản mẫu (Anti-Patterns)
+Lớp tiện ích (Utility Layer): thường được triển khai bằng thư mục "utils" là một tập hợp các hàm 
+(functions) hoặc class độc lập, phi trạng thái (stateless), và có thể tái sử dụng trong toàn bộ 
+dự ánh
+- pages/ (Lớp POM): QUản lý trạng thái và hành vi của UI của các Page, khởi tạo theo dạng 
+new LoginPgae(page)
+- utils/ (Lớp tiện ích): Cung cấp các logic thuần túy hoặc các dịch vụ hỗ trợ, thường được import
+và gọi trực tiếp mà không cần khởi tạo class
+
+my-playwright-project/
+├── pages/
+│   ├── base.page.ts
+│   └── login.page.ts
+├── tests/
+│   └── login.spec.ts
+├── utils/          # <-- ✨ LỚP MỚI
+│   ├── dataFactory.ts  # (🏭 Tạo dữ liệu test)
+│   ├── uiHelpers.ts    # (🧩 Hàm hỗ trợ UI phức tạp)
+│   └── dateUtils.ts    # (📅 Định dạng ngày tháng)
+└── ...
+
+Triển khai 1: Để triển khai tạo dự liệu test (linh động) mà không cần hard code thì thường sử dụng 
+thư viện faker.js để tạo data động sau đó gọi lại hàm ở những nơi cần thiết trong phần page
+Triển khai 2: Hàm hỗ trợ tương tác: Ứng dụng có thể có các component UI phức tạp được sử dụng lại
+ở nhiều trang, ví dụ như ô tìm kiếm "thông minh", hay component chọn ngày (date picker), hoặc sử lý
+các dropdown custom (không phải thẻ <select>)
+Thay vì viết lại các compoent này trong mỗi page thì có thể trừu tượng hóa thành 1 hàm utils
+Điểm khác biệt giữa BasrPage và Utils:
++ BasePage: là có trạng thái (stateful) các phương thức trong basepage thường được sử dụng với các
+this.page (nó lưu trạng thái của page hiện tại để dùng đi dùng lại nhiều lần), hoặc liên quan đến
+trạng thái của DOM; liên quan chặt chẽ đến các thành phần UI của ứng dụng (header, footer), các page
+khác sẽ kế thừa các tính năng của basepage
++ Utils: là phi trạng thái (stateless) chỉ là các hàm cung cấp login thuần túy/ xử lý các data Được
+truyền vào mà không có liên quan gì đến trạng thái của Page hoặc UI, các pageobject hoặc basepage
+đều có thể sử dụng các hàm của utils để tối ưu hóa việc khai báo các chức năng liên 
+
+Nâng cao kiến trúc: POM > CPOM
+Với việc kiến trúc cũ thì basePage sẽ chứa tất cả các logic về các component UI được sử dụng lặp
+lại trong trang như header (chứa logo, thanh tìm kiếm, menu người dùng), bảng dữ kiệu (có thể xuất
+hiện ở bất cứ page nào như userPgae, ProductPage), modal-cửa sổ bật lên: bạn có chắc muốn xóa...
+nhưng mà không phải page nào cũng chứa các logic này, nếu khai báo báo vào basePgae thì các pageobject
+không sử dụng cũng sẽ phải kế thừa nó, đồng thời cũng khiến basePgae phình to với các cấu trúc khai
+báo
+>> Giải pháp: Component page objectmodal, là tiến hóa của POM > Ta tạo ra các class riêng biệt cho
+thành phần UI tái sử dụng khi đó basePgae có thể import lại các thành phần này (ngắn gọn hơn), các 
+pageobject khi muốn sử dụng thì có thể dùng this. để lấy ra để sử dụng
+ví dụng trong file test: await profile.header.logut() > dễ hiểu hơn
+
+TUY NHIÊN, ví dụ trên là với các component xuất hiện ở tất cả các trang như header/footer/sidebar
+thì chúng ta nên khởi tạo trong BasePage, nhưng với các component như bảng dữ liệu phức tạp thì không
+nên khởi tạo trong baseogae bởi vì không phải pageobject nào cũng có nó > nên khởi tọa lại vào CHÍNH
+page object đó để tránh các page khác cũng phải gánh theo chúng
+
+chiến lược xác thực (assertions): nên đặt expect ở đâu ?
+C1: (Phổ biến - nhưng chưa tối ưu):có thể chỉ để expect trong file test: gây ra lẫn lộn giữa việc gọi 
+logic nghiệp vụ của page và việc expect các component trên UI, đồng thời vi phạm nguyên tắc 
+"One assertion per test"
+C2: Expect trong pageObject: ưu điểm là file test sẽ trở nên đồng bộ hơn với chỉ các hành động nghiệp
+vụ của pageobject đó, nhưng khi muốn expect 1 vị trí khác mà không được khai báo hàm sẵn thì lại phải 
+quay lại pageobject để khai báo thêm Hàm
+>> C3: tối ưu 2 ưu điểm của 2 cách trên: vẫn sẽ khai báo expect với các locator thường xuyên được sử
+dụng, với các locator không được hay sử dụng thì nên khai báo ở dạng readonly public trong pageObject
+từ đó mà ở file test có thể expect trực tiếp từ locator này
+
+Nghiêm cấm: việc nối chuỗi trang ở trong pageobject: có nghĩa là trong màn longin lại expect là đã nhảy
+được sang trang homepgae sau khi đăng nhập xong > Vi phạm nguyên tắc riêng biệt của từng PO, đồng Thời
+tạo ra một phụ thuộc cứng (nếu sau này không nhảy đến home mà màn khác thì sẽ gây lỗi) > Không nên 
+khởi tạo 1 homepage vào trong đây
+
+Utility type: Kiểu tiện ích giúp biến đổi các type có sẵn thành các type mới 1 cách tự động
++ Partial<T>: tạo ra một typw mới bằng cách sao chép type T nhưng biến tất cả các property thành option
+(có dấu ?)> dùng nhiều trong tính năng update, khi mà không muốn sửa toàn bộ thông tin và chỉ muốn sửa
+những chỗ cần thiết
++ Record<K,T>: Tạo ra một object type mà K là danh sách các key hợp lệ (string, number,..) còn T là value
+của key đó > làm cho lập trình viên phải khai báo đầy đủ và chính xác các loại dữ liệu và nội dung data
+Ví dụ:
+interface UserInfo {
+  name: string;
+  age: number;
+}
+// Key là string (ID), Value là UserInfo
+const userMap: Record<string, UserInfo> = {
+  "user_01": { name: "Tùng", age: 25 },
+  "user_02": { name: "Hoa", age: 22 },
+};
++ typeof: trả về kiểu dữ liệu của 1 biến > giúp lấy type nhanh nếu không muốn tự khai báo interdace
++ keyof: toán tử lấy ra danh sách các key của 1 type (chỉ hoạt động trên type, không hđ trên biến)
+combo keyof typeof thường được sử dụng để lấy ra các key trong 1 object và sau đó có thể gợi ý cho Người
+dùng (ví dụ nó sẽ gợi ý các Locator mà có thể trỏ tới trong page)
+Việc kết hợp keyof typeof và as const: thì as const sẽ giúp giữ nguyên các value của 1 obejct và không
+thể bị thay đổi từ bên ngoài > khi đó lấy việc lấy value của 1 object sẽ an toàn hơn
