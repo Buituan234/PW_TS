@@ -819,4 +819,80 @@ từ fixturw của robot này sang fixture của rebot khai
 + Thích hợp cho: DỰ án lớn, có nhiều module tách biệt do các team khác nhau làm
 
 
+So sánh với cấu trúc Hook (before/ after) truyền thống và Playwright fixture
+- khởi tạo: chạy vô điều kiện | Chỉ khởi tạo theo test khi cần sử dụng
+- phạm vi: thường gắn với cấu trúc test | linh hoạt, có thể định nghĩa toàn cục và tái sử dụng nhiều nơi
+- quản lý dọn dẹp: tách rời giữa setup và teardown | setup và teardown nằm trong cùng 1 hàm 
+- khả năng kết hợp: khó khoăn khi setup phụ thuộc 1 setup khác | Fix A và B có thể chain qua nhau
+- hiệu năng: gây lãng phí tài nguyên nếu test không cần setup | Tối ưu hơn, chỉ dc gọi khi Cần
+
+Thứ tự thực thi và Dependency graph (đồ thị phụ thuộc):
+Giả sử test cần A và C, A lại phụ thuộc B, thì quy trình thực thi sẽ là: 
+Set up B (Vì A cần B) 
+|
+Setup A (Sau khi B đã sẵn sàng)
+|
+Setup C (Độc lập)
+|
+Chạy test Body
+|
+Tear down C
+|
+Teardown a
+|
+Teardown B (LIFo - Last in first out)
+
+Có 2 cấp độ Scope (Phạm vi) cho fixture: 
++ Test scope(mặc định): Khởi tạo cho mỗi bài test và hủy ngay sau bài test kết thúc
++ Worker scope: khởi tạo mỗi lần cho mỗi tiến trình worker và tái sử dụng
+khai báo bằng cách: 
+export const test = base.extend<{}, workerFicture>({
+  adminToken: [async ({request}, use) => {...},{scpoe: 'worker'}]
+})
+chú ý: extend có 2 tham số tham số đầu là scope textFixture còn tham số thứ 2 là workerFixture
+vì vậy mới có thêm {} ở phía trước biểu thị cho testFixture không cập nhật thêm
+
+Thường dùng để kết nối với DB vì đây là thao tác tốn tài nguyên và chỉ cần tạo liên kết 1 lần trc test
+=> Nên đảm bảo bài test chỉ dùng chung 1 worker
+
+Các Fixture tích hợp sẵn thường được sử dụng: 
+browser: Browser > Đại diện cho 1 trình duyệt: Chrome/Edge/..
+context: BrowserContext > Môi trường web độc lập 
+page: Page > Mở một tab hoặc cửa sổ trình duyệt nằm trong context
+request: APIRequestContext > Dùng để thực hiện gọi API
+
+POM trong kỷ nguyên Fixture: POM truyền thống thì mỗi test sẽ bị lặp đi lặp lại việc khai báo 1 page MỚI
+bằng các const loginPage = new LoginPage(page) > vi phạm nguyên tắc DRY 
+Giải pháp: chuyển việc khởi tạo POM vào trong Fixture giúp file test clean hơn
+Khi đó file test không cần khởi tạo lại các Pgae mà chỉ cần gọi đến fixture đã được tiên vào và dùng 
+
+Best paractice cho cấu trúc Fixture: Kiến trúc 3 tầng
+Tầng 1 (sảnh chờ): Ai cũng vào được (login)
+Tầng 2 (Cổng an ninh): Phải quẹt thẻ (Đăng nhập thành công)
+Tầng 3 (Các phòng ban): Phòng dashboard, phòng kế toán, ...muốn vào đây thì phải đi qua cổng 2
+tượng tự là các file
+auth.fixtures.ts (Tầng 1 và 2): Chứa logic login và tạo ra người gác cổng
+app.fixtures.ts (tầng 3) Chứa công thức tạo ra các trang nghiệp vụ (Dashboard, customer, ..)
+gatekeeper.fixture.ts (tổng hành dinh): Nơi hợp nhất lại để test sử dụng 
+
+trong auth.fixtures.ts: ta sẽ khai báo 2 fixture mới là loginPage và authedPage tương ứng với tầng 1 và2
+|
+trong app.fixture.ts: ta sẽ liệt kê ra các trang web sử dụng (ở đây không truyền vào pgae trống mà là
+page đã được login ), tuy nhiên ở đây ta chỉ khai báo danh sách các page (object) chứ không extend từ test 
+như cũ vì trong auth.fixture đã extend rồi, để chế biến phần này thì ta cần tới file sau
+async ({authedPage}: AppDeps, use: (r: CRMDashboardPage)=>Promise<void>)
+await use(new CRMDashboardPage(authedPage))
+trong đó {authedPage}: AppDeps > thò tay vào túi AppDep (hiện tại là tổng hợp của 2 type PlaywightTestArgs
+và AuthFixture) rồi lấy ra fixture authedPage để dùng
+|
+trong gatekeeper.fixtures.ts: ta mới tổng hợp cả 3 type lại và spread ra 
+auth.extend<gatekeeperFixtures>({
+  ...appFixture
+})
+
+Tại sao lại extend từ auth mà không phải từ Base?
+- vì trong các page đều được tiêm thêm authedPage mà nó chỉ được lấy từ authFixture của Auth 
+- mô tả quá trình tiến hóa của robot: từ base > base + auth > base + auth + app 
+- nếu extend từ base thì base sẽ ko có đủ fixture để cung cấp cho các page mới 
+
 
