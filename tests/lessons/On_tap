@@ -895,4 +895,109 @@ Tại sao lại extend từ auth mà không phải từ Base?
 - mô tả quá trình tiến hóa của robot: từ base > base + auth > base + auth + app 
 - nếu extend từ base thì base sẽ ko có đủ fixture để cung cấp cho các page mới 
 
+Bài 15: Kiến trúc Browser & Kỹ thuật test đa tài khoản 
+Để hiển thị được 1 trang web, playwright phải đi qua 4 tầng kiến tạo
+Tầng 1: Browser Type:
+là các biến: chromium, firefox, webkit; nó nằm im và chưa Chạy
+|
+Tầng 2: Browser
+Được tạo ra bằng lệnh .launch(), đây là lúc phần mềm chrome được bật lên trong task manager
+|
+Tầng 3: Context
+Được tạo ra bằng lệnh .newContext(), nơi cách ly dữ liệu (cookies, Session)
+|
+Tầng 4: Page
+Được tạo ra bằng lệnh .newPage(), nơi ta thao tác click,gõ
 
+và vì bởi đây trang web được chúng ta bật 1 cách thủ công nên khi tắt cũng phải tắt thủ công 
+await browser.close() vì nếu không cửa sổ chrome sẽ treo mãi gây tốn tài nguyên
+
+Tại sao cần phải khởi tạo dài dòng như này khi mà chúng ta chỉ cần dùng fixture Page là đã xong?
+- Bỏ qua login khó: với fixture{page} thì mỗi lần chạy test là sẽ 1 page mới hoàn toàn không liên quan gì đến
+page cũ > sủ dụng kĩ thuật launchPersistentContext > Dùng chrome thật login tay 1 lần lưu hết profile (cookie, 
+history) vào folder > trong code, dùng lệnh launch trỏ vào folder đó > kết quả trình duyệt bật lên đã login 
+sẵn, vượt qua mọi loại CAPTCHA/2FA
+- Giả lập thiết bị "Động": Nếu trong cùng 1 bài test mà bị yêu cầu test trên nhiều loại thiết bị/ màn hình
+thì {page} không thể xử lý được vì cấu hình mặc định đã được set sẵn ở playwright.config.ts > bắt bạn phải tạo
+nhiều project hoặc file config khác nhau (Rất cồng kềnh) > với maunual lauch thì có thể khởi tạo nhiều loại
+thiết bị/ cấu hình trong file test luôn 
+- Muốn test các tính năng liên quan đến cấp quyền: Cameera/ Micro / cài extension > Fixture mặc định rất khó 
+để load Extension hoặc tinh chỉnh permission cho từng bài test riêng lẻ, với manual launch, bạn có thể toàn 
+quyền kiểm soát các tham số khởi động của Chrome
+
+Khi khởi tạo browser và browserContext thì tất cả các thông tin về cookies, localstorage, Cache sẽ được Lưu
+lại ở browserContext do đó ta có thể dễ dàng check được case 1 người có cookie/localstorage có thể sử dụng các
+chức năng page (của browserContext đó) bình thường còn người kia được khởi tại với browserContext khác thì 
+không có quyền sử dụng các tính năng page đó > Cái này thì fixture Page không làm được 
+
+Các trường hợp phổ biến mà bạn thường phải dùng browser.newContext():
++ Test phân quyền: Admin tạo user mới > User mới đăng nhập kiểm tra quyền hạn (mà không cần logout admin)
++ Test real-time(Chat/Noti): Admin nhắn tin > User nhận tin nhắn ngay lập tức
++ Test concurrency (Đồng thời): Gảo lập 10 người mua hàng cùng lúc xem kho hầng trừ đúng số lượng không
+
+
+Bài 16: Quản lý đa môi trường (Env), Cross-Platform, và làm chủ vòng đời test (Hooks) 
+Phần 1: Bảo mật và quản lý đa môi trường (dotenv-flow)
+Nếu mà chúng ta cứ viết hết thông tin tài khoản/ mật khẩu/ link môi trường hết vào file test hoặc PO thì sẽ Dễ
+dàng bị rò rỉ khi mà đẩy dự án lên git, hoặc muốn chạy test trên nhiều loại môi trường một cách linh hoạt mà 
+không cần đi dò từng file để sửa lại các thông tin chính xác với môi trường
+>> Sử dụng thư viện dotenv-flow
+Xây dựng cấu trúc chuẩn cho dự án (ví dụ dự án có 2 môi trường Dev và staging)
+my-project/
+
+├── .env                   (1. Cấu hình CHUNG - Ai cũng giống nhau): Chứa biến không bao giờ thay đổi
+
+├── .env.development       (2. Cấu hình riêng cho DEV): Chứa biến theo môi trường (URL/ Public key)
+
+├── .env.staging           (3. Cấu hình riêng cho STAGING): Chứa biến theo môi trường (URL/ Public key)
+
+├── .env.local             (4. BÍ MẬT - Chỉ máy bạn có - Không Up Git)
+
+└── .gitignore             (Quan trọng): Nó sẽ bỏ qua các file được khai báo trong đây trc khi lên git
+
+Nguyên tắc cốt lõi của dotenv-flow là cái load sau sẽ ghi đè cái load trước
+ví dụ nếu chạy lệnh NODE_ENV = test (môi trường cụ thể) thì dotenv-flow sẽ đọc và nạp biến từ 1 đến 4
+.env > .env.local > .env.test (file môi trường cụ thể mạnh hơn file .env.local chung chung)> .env.test.local 
+(.env.development.local là file chứa các biến bảo mật nhất Password, Private key)
+> Có thể kiểm soát được biến nào đang sử dụng
+
+Kích học dotenv-flow ngay trong file config 
+
+dotenv-flow hoạt động theo nguyên lý Current Working Directory - Thư mục hiện tại bạn đang đứng gõ lệnh
+nó sẽ tìm các file .env ngay dưới thư mục (thư mục Root) > vậy nên muốn chạy được phải cd ra thư mục Root
+
+Quy trình hoạt động: dotenv-flow sẽ nhìn vào biến NODE_ENV mà b gõ trên terminal khi chạy test > Nếu giá trị
+là staging thì đưa cho bạn giá trị của file .env.staging > Trong trường hợp bạn không gọi ra biến NODE_ENV
+thì nó sẽ lục lại file config để xem giá trị được gán như nào, thường trong file config sẽ được khai báo:
+
+if (!process.env.NODE_ENV) {
+  // 👇 Bước 2: Nếu chưa có, thử tìm phiếu phụ (ENV_NAME) hoặc điền mặc định là 'development'
+  process.env.NODE_ENV = process.env.ENV_NAME || 'development';
+}
+// 👇 Bước 3: Đưa phiếu cho thủ thư và yêu cầu lấy sách
+dotenvFlow.config({
+  default_node_env: 'development', // Lưới an toàn cuối cùng
+});
+
+Tại sao phải khai báo trong playwright.config.ts ? 
+Vì khi gõ lệnh npx playwright test thì PW tìm đọc file config đầu tiên > Ở đây nó sẽ có thồn tin về URL/
+môi trường/Time out > Chạy các global setup khác (nếu có) > Chia bài test cho worker để chạy 
+Và phải để ở đầu tiên của playwright.config.ts vì lúc đó biến môi trường sẽ được nạp vào bộ nhớ tiến trình và
+được truyền xuống cho các thành phần con: Globalsetup/ teardown/ Project dependencies (các file setup)/ worker
+
+Phần 2: Chuẩn hóa lệnh chạy đa nền tảng (cross-env & scripts)
+ở window bình thường ta sẽ chạy: $env:NODE_ENV="staging"; npx playwright test
+> khó nhớ/chết khi lên CI/CD vì CI/CD chạy linux còn mấy cá nhân dùng window
+
+Từ đó cài đặt cross-env giúp "phiên dịch" lệnh gán biến môi trường thành ngôn ngữ chung
+npm install cross-env --save-dev
+lúc này muốn chạy ta chỉ cần gõ: npx cross-env NODE_ENV=staging ...
+lúc này, cross-env sẽ tự động tìm xem máy là loại window hay Mac để dịch lệnh tương Ứng
+
+Thế nhưng nhìn chung thì khi gõ: "cross-env NODE_ENV=development npx playwright test" vẫn khá là dài và khó nhớ
+Ta có thể sử dùng file "package.json": ở đây trong mục scripts nó giống như cái menu ngắn gọn b chỉ cần nhớ cái 
+tên tóm tắt và sẽ tự động được bê ra cái tên CHÍNH
+>> Khi đó bạn chỉ cần gõ trong termial: "npm run test:dev" là sẽ được bê ra cả cấu trúc dài phía trên
+Vì sao lại là npm? khi dùng npm run thì lệnh luôn được thực thi từ Root và không cần lo mình đang đứng ở đâu
+
+Phần 3: test hook và sự tiến hóa lên Fixture
