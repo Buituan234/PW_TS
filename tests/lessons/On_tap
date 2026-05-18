@@ -5,6 +5,9 @@ replace(): trả về 1 chuỗi kí tự mới và thay phần tử đầu tiên
 replaceAll(): trả về 1 chuỗi kí tự mới và thay tất cả các phẩn tử nó tìm được
 length(): lấy độ dài chuỗi
 toLowerCase()/ toUpperCase(): chuẩn hóa chữ hoa, chữ thường trước khi so sánh
+split(): dùng để tách chuỗi thành mảng dựa trên ký tự ngăn cách truyền vào
+slice(start, end): để cắt ra một phần của chuỗi thành chuỗi mới (sẽ lấy từ vị trí 
+bắt đầu đến "phần tử kết thúc -1" tức là dừng trước phần tử end)
 
 Sử dụng push() và pop() để thêm và xóa phần tử cuối cùng ở trong mảng
 
@@ -15,6 +18,9 @@ array.map(): dùng để biến đổi dữ liệu của 1 mảng (base) để t
 
 array.filter(): dùng để lọc dữ liệu
 + chỉ giữ lại các phần tử thỏa mãn điều kiện và gon lại thành 1 mảng mới
+
+array.join(): dùng để nối các phần tử của mảng thành 1 chuỗi string với kí tự
+truyền vào là ký tự ngăn cách các phần tử
 
 arrar.include(): Kiểm tra mảng có tồn tại phần tử không
 + Trả về true/false
@@ -698,4 +704,302 @@ Chú ý phân biệt: Nếu thấy => trong PW cần biết phân biệt Đượ
 Nếu nó nắm sau dấu hai chấm ":" hoặc trong type ... = , nó ám chỉ type của Biến
 Nếu nó nằm sau dấu bằng trong code logic thì nó là hàm thực thi
 
+Chú ý: arrow function trong PW chỉ được dùng với cách gán nó cho 1 giá trị hoặc truyền vào như 1 tham số
+của hàm, nó không thể đứng độc lập như cách khai báo 1 function
+
 Cách xử lý bảng (table) trong PW:
+- XỬ lý dữ liệu: Khai báo type của table > các hàm để format lại dữ liệu header > tạo bảng > lấy thôn tin
+của cột > tạo type: function để format lại data của cell > lấy thông tin cell > lấy thông tin của 1 côt >
+lấy thông tin của 1 hàng > lấy thông tin của bảng
+
+Bài 12: Kỹ thuật quản lý test data 
+(Khoai quá coi lại sau)
+
+Bài 13: Làm chủ kiến trúc fixture và dependency injection từ gốc
+Cơ chế của dependency injection bao gồm 3 phần chính:
++ Sổ tay công thức, nơi liệt kê ra tất cả các tính năng mà con robot có thể cung cấp cho người dùng
++ Tư duy ngược: nó sẽ tự truy ngược lại xem để thực hiện cái bạn yêu cầu là gì và tìm kiếm thành phần đầu
+tiên
++ Sau khi sử dụng xong thì nó sẽ tự clear hoặc gì đó sau câu lệnh use trong DI (teardown)
+
+Trong Playwright thì khách hàng (customer) chính là hàm  test('....', )
+Món ăn (Dependency) chính là các đối tượng như page, request và context
+Người phục vụ và nhà bếp (Injector & Container): người lẳng lặng tạo ra page và đưa vào hàm test là
+Playwright Test Runner
+
+Fixture là một 'Dịch vụ' hoặc một 'Món ăn' đã được đăng ký vào trong hệ thống DI của playwright
+Khi dùng dòng lệnh test.extend(): thực chất là hành động đăng ký
+Các fixture thường được để trong dáu ngoặc nhọn: ({page, todoPage}), bởi trong tư duy DI của playwright
+thì đây chính là danh sách yêu cầu
+
+Cách để tạo ra 1 fixture mới:
+B1: nhập con robot gốc về import {test as base} from '@playwright/test'
+B2: Dạy con robot công thức: export const test = base.extend({ ...các món ăn mới...})
+B3: GỌi món để kiểm tra (test)
+Code minh họa:
+import { test as base } from '@playwright/test';
+// 1. MENU (Định nghĩa kiểu dữ liệu)
+// Robot cần biết nó sắp phục vụ những món gì
+export const test = base.extend<{
+  randomNumber: number;  // Món 1: Số
+  greeting: string;      // Món 2: Chữ
+  userInfo: { name: string; age: number; email: string }; // Món 3: Object (Dữ liệu phức tạp)
+}>({
+
+  // 2. CÔNG THỨC CHẾ BIẾN (Implementation)
+  // --- Món 1: Số ngẫu nhiên ---
+  randomNumber: async ({}, use) => {
+    // Chế biến trong bếp (Logic ẩn)
+    const number = Math.floor(Math.random() * 100) + 1;
+    // Bưng ra bàn
+    await use(number);
+  },
+
+  // --- Món 2: Lời chào ---
+  greeting: async ({}, use) => {
+    const message = 'Hello, World!';
+    await use(message);
+  },
+
+  // --- Món 3: Thông tin User ---
+  userInfo: async ({}, use) => {
+    const user = {
+      name: 'John Doe',
+      age: 30,
+      email: 'john@example.com',
+    };
+    await use(user);
+  },
+});
+
+Cần phải "test as base" rồi lại export test là bởi: Robot phục vụ chính thức luôn có tên là test, và Khi
+bạn nhập về thì tên mặc định của nó là test và bạn muốn độ lại con robot này và tạo ra con robot mới cũng
+tên là 'test' thì sẽ bị xung đột > giải pháp là khi nhập con robot cũ về thì đặt tên nó là base để tách
+biệt với tên test MỚI
+Con robot này sẽ thừa hưởng lại tất cả các kỹ năng của robot cũ + kĩ năng mới học
+
+Như vậy fixture không chỉ là page, nó có thể là dạng string, number hoặc một object data, khi mà ta liệt
+kê ra các thứ trong hàm test thì PW sẽ tiêm những thứ chúng ta cần vào, mà không đả đụng tới các fixter
+khác
+
+Bài 14: Kiến trúc fiture nâng cao: Tổ chức và tối ưu hóa dự án
+Các một bài test hoạt động như 1 chiếc bánh mỳ kẹp thịt:
+Code chạy trước khi test bắt đầu (fixture setup) > chạy hàm test > code chạy sau khi test kết thúc 
+(teardown)
+
+Khi khai báo 1 fixture mới tại sao lại cần await use() mà không phải return ?
+- Nếu dùng return thì hàm fixture sẽ kết thúc ngay lập tức, nó không thể dọn dẹp (teardown) nữa
+- await giúp giữ kết nối với trong khi bài test đang chạy, bài test sẽ mất 5s-10s gì đó vì là bất đồng bộ 
+- nếu bài test mà bị chạy fail thì vẫn thực hiện teardown tránh việc rác dữ liệu
+
+Trong PW việc fixture C cần Fixture B và Fixture A được gọi là Fixture changing (chuỗi phụ thuộc)
+Khi đó khai báo fixture C thì cần truyền vào Fixture B và Fixture B lại cần truyền vào Fixtue A trc đó
+Nếu không có nối chuỗi thì ta phải gọi cả 3 fixture và tự làm công đoạn liên kết chúng ở phần test
+> Rất phiền phức
+
+Khi dự án lớn lên, việc quản lý fixture vào cùng 1 file sẽ tạo nên sự hỗn loạn, bởi vậy cần chia để trị:
+Cách tổng hợp fixture 1: Spread (...): Trải ra (Phổ biên hơn)
+Thuê 1 ông bếp trưởng, học thuộc lòng tất cả các công thức (fixture) của các Page
+
+Logic: File Con (Component): Chỉ chứa Object (công thức) và Type (menu). Không gọi lệnh base.extend.
+File Tổng (Index): Là nơi duy nhất dùng lệnh base.extend. Đây là nơi tạo ra con Robot thực sự.
+Toán tử Spread (...): Giúp chúng ta "copy-paste" code một cách tự động.
+...barRecipes tương đương với việc chép toàn bộ hàm trong barRecipes dán vào base.extend.
+
++ Bản chất file con: File con chỉ chứa Object (nguyên liệu thô), không thể chạy test từ file này
++ Quản lý Type: Thủ công, cần import Type A, Type B rồi nối lại trong: type Tong = Type A & Type B1
++ Sự phụ thuộc (dependency): chặt chễ vì đã trộn chung vào 1 nơi, dễ dàng gọi fixture này qua fixture Khác
++ Xug đột tên: Nếu cả 2 file đều có món tên menu thì file sau sẽ ghi đè file trước
++ Thích hợp cho: Dự án team nhỏ/ vừa: code tập trung, dễ hiểu, dễ gọi qua lại
+
+Cách tổng hợp fixture 2: MergerTest(): Hợp thể
++ Bản chất file con: là dependency container hoàn chỉnh (đã extend), có thể viết bài test trong file
++ Quản lý Type: Tự động, mergerTests thông minh tự động gộp các kiểu lại, ít khi phải khai báo thủ công
++ Sự phụ thuộc (dependency): Độc lập các robot khác nhau sẽ độc lập với nhau không tồn tại việc gọi chéo
+từ fixturw của robot này sang fixture của rebot khai
++ Xung đột tên: Tách biệt scope nên ít xảy ra xung đột
++ Thích hợp cho: DỰ án lớn, có nhiều module tách biệt do các team khác nhau làm
+
+
+So sánh với cấu trúc Hook (before/ after) truyền thống và Playwright fixture
+- khởi tạo: chạy vô điều kiện | Chỉ khởi tạo theo test khi cần sử dụng
+- phạm vi: thường gắn với cấu trúc test | linh hoạt, có thể định nghĩa toàn cục và tái sử dụng nhiều nơi
+- quản lý dọn dẹp: tách rời giữa setup và teardown | setup và teardown nằm trong cùng 1 hàm 
+- khả năng kết hợp: khó khoăn khi setup phụ thuộc 1 setup khác | Fix A và B có thể chain qua nhau
+- hiệu năng: gây lãng phí tài nguyên nếu test không cần setup | Tối ưu hơn, chỉ dc gọi khi Cần
+
+Thứ tự thực thi và Dependency graph (đồ thị phụ thuộc):
+Giả sử test cần A và C, A lại phụ thuộc B, thì quy trình thực thi sẽ là: 
+Set up B (Vì A cần B) 
+|
+Setup A (Sau khi B đã sẵn sàng)
+|
+Setup C (Độc lập)
+|
+Chạy test Body
+|
+Tear down C
+|
+Teardown a
+|
+Teardown B (LIFo - Last in first out)
+
+Có 2 cấp độ Scope (Phạm vi) cho fixture: 
++ Test scope(mặc định): Khởi tạo cho mỗi bài test và hủy ngay sau bài test kết thúc
++ Worker scope: khởi tạo mỗi lần cho mỗi tiến trình worker và tái sử dụng
+khai báo bằng cách: 
+export const test = base.extend<{}, workerFicture>({
+  adminToken: [async ({request}, use) => {...},{scpoe: 'worker'}]
+})
+chú ý: extend có 2 tham số tham số đầu là scope textFixture còn tham số thứ 2 là workerFixture
+vì vậy mới có thêm {} ở phía trước biểu thị cho testFixture không cập nhật thêm
+
+Thường dùng để kết nối với DB vì đây là thao tác tốn tài nguyên và chỉ cần tạo liên kết 1 lần trc test
+=> Nên đảm bảo bài test chỉ dùng chung 1 worker
+
+Các Fixture tích hợp sẵn thường được sử dụng: 
+browser: Browser > Đại diện cho 1 trình duyệt: Chrome/Edge/..
+context: BrowserContext > Môi trường web độc lập 
+page: Page > Mở một tab hoặc cửa sổ trình duyệt nằm trong context
+request: APIRequestContext > Dùng để thực hiện gọi API
+
+POM trong kỷ nguyên Fixture: POM truyền thống thì mỗi test sẽ bị lặp đi lặp lại việc khai báo 1 page MỚI
+bằng các const loginPage = new LoginPage(page) > vi phạm nguyên tắc DRY 
+Giải pháp: chuyển việc khởi tạo POM vào trong Fixture giúp file test clean hơn
+Khi đó file test không cần khởi tạo lại các Pgae mà chỉ cần gọi đến fixture đã được tiên vào và dùng 
+
+Best paractice cho cấu trúc Fixture: Kiến trúc 3 tầng
+Tầng 1 (sảnh chờ): Ai cũng vào được (login)
+Tầng 2 (Cổng an ninh): Phải quẹt thẻ (Đăng nhập thành công)
+Tầng 3 (Các phòng ban): Phòng dashboard, phòng kế toán, ...muốn vào đây thì phải đi qua cổng 2
+tượng tự là các file
+auth.fixtures.ts (Tầng 1 và 2): Chứa logic login và tạo ra người gác cổng
+app.fixtures.ts (tầng 3) Chứa công thức tạo ra các trang nghiệp vụ (Dashboard, customer, ..)
+gatekeeper.fixture.ts (tổng hành dinh): Nơi hợp nhất lại để test sử dụng 
+
+trong auth.fixtures.ts: ta sẽ khai báo 2 fixture mới là loginPage và authedPage tương ứng với tầng 1 và2
+|
+trong app.fixture.ts: ta sẽ liệt kê ra các trang web sử dụng (ở đây không truyền vào pgae trống mà là
+page đã được login ), tuy nhiên ở đây ta chỉ khai báo danh sách các page (object) chứ không extend từ test 
+như cũ vì trong auth.fixture đã extend rồi, để chế biến phần này thì ta cần tới file sau
+async ({authedPage}: AppDeps, use: (r: CRMDashboardPage)=>Promise<void>)
+await use(new CRMDashboardPage(authedPage))
+trong đó {authedPage}: AppDeps > thò tay vào túi AppDep (hiện tại là tổng hợp của 2 type PlaywightTestArgs
+và AuthFixture) rồi lấy ra fixture authedPage để dùng
+|
+trong gatekeeper.fixtures.ts: ta mới tổng hợp cả 3 type lại và spread ra 
+auth.extend<gatekeeperFixtures>({
+  ...appFixture
+})
+
+Tại sao lại extend từ auth mà không phải từ Base?
+- vì trong các page đều được tiêm thêm authedPage mà nó chỉ được lấy từ authFixture của Auth 
+- mô tả quá trình tiến hóa của robot: từ base > base + auth > base + auth + app 
+- nếu extend từ base thì base sẽ ko có đủ fixture để cung cấp cho các page mới 
+
+Bài 15: Kiến trúc Browser & Kỹ thuật test đa tài khoản 
+Để hiển thị được 1 trang web, playwright phải đi qua 4 tầng kiến tạo
+Tầng 1: Browser Type:
+là các biến: chromium, firefox, webkit; nó nằm im và chưa Chạy
+|
+Tầng 2: Browser
+Được tạo ra bằng lệnh .launch(), đây là lúc phần mềm chrome được bật lên trong task manager
+|
+Tầng 3: Context
+Được tạo ra bằng lệnh .newContext(), nơi cách ly dữ liệu (cookies, Session)
+|
+Tầng 4: Page
+Được tạo ra bằng lệnh .newPage(), nơi ta thao tác click,gõ
+
+và vì bởi đây trang web được chúng ta bật 1 cách thủ công nên khi tắt cũng phải tắt thủ công 
+await browser.close() vì nếu không cửa sổ chrome sẽ treo mãi gây tốn tài nguyên
+
+Tại sao cần phải khởi tạo dài dòng như này khi mà chúng ta chỉ cần dùng fixture Page là đã xong?
+- Bỏ qua login khó: với fixture{page} thì mỗi lần chạy test là sẽ 1 page mới hoàn toàn không liên quan gì đến
+page cũ > sủ dụng kĩ thuật launchPersistentContext > Dùng chrome thật login tay 1 lần lưu hết profile (cookie, 
+history) vào folder > trong code, dùng lệnh launch trỏ vào folder đó > kết quả trình duyệt bật lên đã login 
+sẵn, vượt qua mọi loại CAPTCHA/2FA
+- Giả lập thiết bị "Động": Nếu trong cùng 1 bài test mà bị yêu cầu test trên nhiều loại thiết bị/ màn hình
+thì {page} không thể xử lý được vì cấu hình mặc định đã được set sẵn ở playwright.config.ts > bắt bạn phải tạo
+nhiều project hoặc file config khác nhau (Rất cồng kềnh) > với maunual lauch thì có thể khởi tạo nhiều loại
+thiết bị/ cấu hình trong file test luôn 
+- Muốn test các tính năng liên quan đến cấp quyền: Cameera/ Micro / cài extension > Fixture mặc định rất khó 
+để load Extension hoặc tinh chỉnh permission cho từng bài test riêng lẻ, với manual launch, bạn có thể toàn 
+quyền kiểm soát các tham số khởi động của Chrome
+
+Khi khởi tạo browser và browserContext thì tất cả các thông tin về cookies, localstorage, Cache sẽ được Lưu
+lại ở browserContext do đó ta có thể dễ dàng check được case 1 người có cookie/localstorage có thể sử dụng các
+chức năng page (của browserContext đó) bình thường còn người kia được khởi tại với browserContext khác thì 
+không có quyền sử dụng các tính năng page đó > Cái này thì fixture Page không làm được 
+
+Các trường hợp phổ biến mà bạn thường phải dùng browser.newContext():
++ Test phân quyền: Admin tạo user mới > User mới đăng nhập kiểm tra quyền hạn (mà không cần logout admin)
++ Test real-time(Chat/Noti): Admin nhắn tin > User nhận tin nhắn ngay lập tức
++ Test concurrency (Đồng thời): Gảo lập 10 người mua hàng cùng lúc xem kho hầng trừ đúng số lượng không
+
+
+Bài 16: Quản lý đa môi trường (Env), Cross-Platform, và làm chủ vòng đời test (Hooks) 
+Phần 1: Bảo mật và quản lý đa môi trường (dotenv-flow)
+Nếu mà chúng ta cứ viết hết thông tin tài khoản/ mật khẩu/ link môi trường hết vào file test hoặc PO thì sẽ Dễ
+dàng bị rò rỉ khi mà đẩy dự án lên git, hoặc muốn chạy test trên nhiều loại môi trường một cách linh hoạt mà 
+không cần đi dò từng file để sửa lại các thông tin chính xác với môi trường
+>> Sử dụng thư viện dotenv-flow
+Xây dựng cấu trúc chuẩn cho dự án (ví dụ dự án có 2 môi trường Dev và staging)
+my-project/
+
+├── .env                   (1. Cấu hình CHUNG - Ai cũng giống nhau): Chứa biến không bao giờ thay đổi
+
+├── .env.development       (2. Cấu hình riêng cho DEV): Chứa biến theo môi trường (URL/ Public key)
+
+├── .env.staging           (3. Cấu hình riêng cho STAGING): Chứa biến theo môi trường (URL/ Public key)
+
+├── .env.local             (4. BÍ MẬT - Chỉ máy bạn có - Không Up Git)
+
+└── .gitignore             (Quan trọng): Nó sẽ bỏ qua các file được khai báo trong đây trc khi lên git
+
+Nguyên tắc cốt lõi của dotenv-flow là cái load sau sẽ ghi đè cái load trước
+ví dụ nếu chạy lệnh NODE_ENV = test (môi trường cụ thể) thì dotenv-flow sẽ đọc và nạp biến từ 1 đến 4
+.env > .env.local > .env.test (file môi trường cụ thể mạnh hơn file .env.local chung chung)> .env.test.local 
+(.env.development.local là file chứa các biến bảo mật nhất Password, Private key)
+> Có thể kiểm soát được biến nào đang sử dụng
+
+Kích học dotenv-flow ngay trong file config 
+
+dotenv-flow hoạt động theo nguyên lý Current Working Directory - Thư mục hiện tại bạn đang đứng gõ lệnh
+nó sẽ tìm các file .env ngay dưới thư mục (thư mục Root) > vậy nên muốn chạy được phải cd ra thư mục Root
+
+Quy trình hoạt động: dotenv-flow sẽ nhìn vào biến NODE_ENV mà b gõ trên terminal khi chạy test > Nếu giá trị
+là staging thì đưa cho bạn giá trị của file .env.staging > Trong trường hợp bạn không gọi ra biến NODE_ENV
+thì nó sẽ lục lại file config để xem giá trị được gán như nào, thường trong file config sẽ được khai báo:
+
+if (!process.env.NODE_ENV) {
+  // 👇 Bước 2: Nếu chưa có, thử tìm phiếu phụ (ENV_NAME) hoặc điền mặc định là 'development'
+  process.env.NODE_ENV = process.env.ENV_NAME || 'development';
+}
+// 👇 Bước 3: Đưa phiếu cho thủ thư và yêu cầu lấy sách
+dotenvFlow.config({
+  default_node_env: 'development', // Lưới an toàn cuối cùng
+});
+
+Tại sao phải khai báo trong playwright.config.ts ? 
+Vì khi gõ lệnh npx playwright test thì PW tìm đọc file config đầu tiên > Ở đây nó sẽ có thồn tin về URL/
+môi trường/Time out > Chạy các global setup khác (nếu có) > Chia bài test cho worker để chạy 
+Và phải để ở đầu tiên của playwright.config.ts vì lúc đó biến môi trường sẽ được nạp vào bộ nhớ tiến trình và
+được truyền xuống cho các thành phần con: Globalsetup/ teardown/ Project dependencies (các file setup)/ worker
+
+Phần 2: Chuẩn hóa lệnh chạy đa nền tảng (cross-env & scripts)
+ở window bình thường ta sẽ chạy: $env:NODE_ENV="staging"; npx playwright test
+> khó nhớ/chết khi lên CI/CD vì CI/CD chạy linux còn mấy cá nhân dùng window
+
+Từ đó cài đặt cross-env giúp "phiên dịch" lệnh gán biến môi trường thành ngôn ngữ chung
+npm install cross-env --save-dev
+lúc này muốn chạy ta chỉ cần gõ: npx cross-env NODE_ENV=staging ...
+lúc này, cross-env sẽ tự động tìm xem máy là loại window hay Mac để dịch lệnh tương Ứng
+
+Thế nhưng nhìn chung thì khi gõ: "cross-env NODE_ENV=development npx playwright test" vẫn khá là dài và khó nhớ
+Ta có thể sử dùng file "package.json": ở đây trong mục scripts nó giống như cái menu ngắn gọn b chỉ cần nhớ cái 
+tên tóm tắt và sẽ tự động được bê ra cái tên CHÍNH
+>> Khi đó bạn chỉ cần gõ trong termial: "npm run test:dev" là sẽ được bê ra cả cấu trúc dài phía trên
+Vì sao lại là npm? khi dùng npm run thì lệnh luôn được thực thi từ Root và không cần lo mình đang đứng ở đâu
+
+Phần 3: test hook và sự tiến hóa lên Fixture
