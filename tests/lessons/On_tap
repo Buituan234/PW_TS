@@ -28,6 +28,8 @@ object.value(): Trả về 1 mảng có các phần tử là các giá trị (c�
 object.entris(): trả về 1 mảng có các phẩn tử là các mảng con 
 bao gồm 2 giá trị key và value: [key, value]
 
+khai báo mảng bất kỳ có type ... > type[]
+
 
 Bài 1: Tìm hiểu khái niệm cốt lỗi 
 Các chức năng của Page có thể thực hiện:

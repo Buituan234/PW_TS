@@ -55,7 +55,7 @@ export abstract class BasePage {
                 } catch { }
             }
         }
-
+        text = text.charAt(0).toUpperCase() + text.slice(1)
         return text
     }
     protected get<T extends Record<string, string | ((page: Page) => Locator)>>(
