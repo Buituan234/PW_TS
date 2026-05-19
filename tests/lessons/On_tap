@@ -34,6 +34,8 @@ object.value(): Trả về 1 mảng có các phần tử là các giá trị (c�
 object.entris(): trả về 1 mảng có các phẩn tử là các mảng con 
 bao gồm 2 giá trị key và value: [key, value]
 
+khai báo mảng bất kỳ có type ... > type[]
+
 
 Bài 1: Tìm hiểu khái niệm cốt lỗi 
 Các chức năng của Page có thể thực hiện:
@@ -1034,3 +1036,62 @@ Trường hợp muốn dùng BeforeEach: Điều hướng trong trang (sau khi �
 reset trạng thái
 
 
+Bài 17: Làm chủ cấu hình Playwright
+testDir: giúp chung ta khoanh vùng nơi để các file test, thay vì pw phải tự quét cả dự án để tìm các file phù
+hợp thì ở đây ta khoanh vùng trước để tăng tốc tiến trình
+testDir: './tests' >
+dấu '.' nghĩa là tại đây, nơi đặt file config
+dấu '/' dấu ngăn thư mục
+'tests' là thư mục bạn muốn chọc vào
+'**/*.spec.ts' : "**/" Chọc vào tất cả các folder con cháu phía Trong
+*.spec.ts > tất cả các file có đuôi là spec.ts
+
+Project: Tại sao cần chia nhỏ ra nhiều project trong PW
++ TỐi ưu hóa tài nguyên: Có những bài test thì cần UI riêng biệt, hoặc setting riêng biệt > Cần chia nhỏ các prj 
+ra để có thể setup các thông tin cho phù hợp với môi trường test (test API thì không cần UI/ ...)
++ Tạo ra được ma trận kiểm thử: với loại thiết bị này thì sao/ môi trường này như nào/...
++ Dễ dàng tạo nên các mô hình phụ thuộc với nhau > setup, teardown
+Và các thông tin ở trong project sẽ ghi đè các thông tin ở bên ngoài (global)
+Bảng phân quyền lực: Global > Project > test.use()
+Test.use chỉ nên được sử dụng với các case đặc biệt (edge case: THiết bị/ Fake thông tin)
+Việc thay thế các thông tin cũ ở global > Nó là loại thay thế nông, tức là nếu ở global có chứa 1 object A và vào
+trong project chúng ta đổi gia trị thành 1 kiểu khác thì nó sẽ thay thế hoàn toàn object cũ, chứ không phải chỉ 1
+giá trị trong object đó, vậy nên nếu muốn giữ lại giá trị nào trong obejct thì nên dùng spread...
+
+Cấu trúc đầy đủ của 1 project trong file config bao gồm:
+- Nhóm định danh: name: 'chromium-desktop' > là cái tên để chạy CLI hoặc hiển thị trong báo cáo
+- Nhóm lọc file: testDir (xác định sân chơi), testMatch (file nào được chấp nhận), testIgnore (file nào bị bỏ qua)
+- Nhóm môi trường: use: {browserName:..., baseURL:..., storageState:..., headless:...,} cấu hình các thuộc tính, 
+thông tin thiết bị, cách thức chạy, setup môi trường
+- Nhóm điều phối: dependencies (chỉ bắt đầu chạy test khi các dependen này pass) và teardown (chỉ định prj nào sẽ 
+chạy sau cùng để dọn rác)
+NOTE: Nên đặt teardown ở trong project setup luôn còn prj chính chỉ cần dependencies: ['setup']
+- Nhóm vận hành: fullyParallel (chạy song song bên trong test), retries: 2, timeout (các cái ngoại lai)
+
+Khi chạy terminal cho các bài test thì nó sẽ tự gán các bài test cho các prject thích hơp > do đó có thể xảy ra
+tình trạng 1 bài test chạy nhiều lần (tại nó match với điều kiện testMatch của các prj khác)
+
+Global setup và global teardown
+- Global setup là file chứa đoạn code chạy đầu tiên, trước bất cứ file test nào > Nhiệm vụ setup biến môi trường,
+kết nối database, tạo thư mục tạm
+- Global teardownlaf file chứa đoạn code chạy cuối cùng, sau khi đã chạy xong các file test (kể có pass hay failed)
+dùng để ngắt kết nối db, xóa biến tạm
+>> Nhưng mà global setup/teardown có rất nhiều khuyết điểm: Nó như 1 blackbox (không có report về quá trình chạy),
+phải tự khởi tạo các context, page,..., chỉ chấp nhận truyền data dạng string cho các test khác qua biến env, và nó
+sẽ chạy 1 lần cho tất cả các project khác nhau mặc dù project đó không cần setup/teardown
+>> Do đó phương pháp hiện đại hơn ra đời: "Project dependency": Nó hiệu quả hơn ở chỗ là có report, khi chạy xong 
+nếu bị fail thì có thể dò ra chỗ bị lỗi, đồng thời có thể linh hoạt giữa các project khác nhau
+- Điển ưu việt của setup và teardown project là nó sẽ chạy phần teardown kể cả khi setup/test bị lỗi, điều mà afterAll 
+thường sẽ không làm nếu phâng test bị failed
+Nhưng cũng nên cấu hình file teardown cho hợp lý tránh các case file setup bị failed nhưng chưa tạo ra data rác mà file
+teardown cứ cố gắng tìm data rác để clear rồi cũng fail theo thì rất ko ổn
+
+Running sequence là gì? là cách project test chạy theo sự phụ thuộc với các dependencies
++ Những project nào có sự phụ thuộc với file setup thì sẽ phải chờ file setup chạy xong, nếu setup failed thì ko prj
+nào được chạy cả, tuy nhiên teardown vẫn có thể Chạy
++ Khi setup chạy xong thì các prj phụ thuộc sẽ chạy song song với nhau
++ Teardown sẽ kiên nhẫn chờ setup và test chạy xong
+Vì sao worker chết thì afterAll cũng chết theo? Bởi vì beforeAll và afterAll đi liền với worker > nên khi bài test gây
+ra việc woker dừng thì afterAll sẽ không thể Chạy
+
+Trong các bài test thì việc sử dụng setup để đăng nhập lấy cookie/JWT token > lưu vào storageState để bài test sử dụng
