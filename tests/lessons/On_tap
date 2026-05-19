@@ -1095,3 +1095,27 @@ Vì sao worker chết thì afterAll cũng chết theo? Bởi vì beforeAll và a
 ra việc woker dừng thì afterAll sẽ không thể Chạy
 
 Trong các bài test thì việc sử dụng setup để đăng nhập lấy cookie/JWT token > lưu vào storageState để bài test sử dụng
+
+Bài 18: Test option: Trang bị 'Balo hành trang' và vũ khí cho test runner (HỌc sau nhé)
+
+Bài 19: Test info và tag (Học sau nhé)
+
+Bài 20: Playwright deep dive: Kiến trúc proces, data-driven và tối ưu  song song
+- Giải mãi kiến trúc đa tiến trình (multi-process): 
+khi bạn gõ npx playwright test, main process khởi động và lập kế hoạch
++ Giai đoạn 1: Nó (main process) yêu cầu Node.js đọc file test > toàn bộ code bên ngoài test được chạy để khởi tạo biến
+> gặp hàm test thì thống kê lại (không chạy) > sau khi đã có danh sách list test > áp dụng bộ lọc --grep > tính toán
+xem cần bao nhiêu worker > chia việc cho các worker phụ trách test nào
++ Giai đoạn 2: Main process không gửi code mà nó gửi mệnh lệnh  (qua kênh IPC) cho worker và giao lệnh cho worker Chạy
+test nào, test nào
++ Giai đoạn 3: Woker khởi động > Nhận lệnh > Và chạy lại file test đó từ đầu (toplevel) vì worker cần tái tại lại thồng
+tin môi trường (main process chỉ cấp lệnh - ko gửi dữ liệu) > Nó gặp các hàm test thì sẽ so sánh với lệnh để biết có làm 
+hay không > chạy code test
+
+Giải thích kĩ hơn tại sao Worker process cần phải "Đọc lại" file test
++ main process và worker process là 2 thực thể độc lập > nói chuyện qua IPC - inter process communication > chỉ vận
+chuyển được các text văn bản thuần túy hoặc Json > Không thể vận chuyển hàm
++ Kể cả có gửi được hàm qua cho woker process thì cũng sẽ bị thiếu ngữ cảnh (các giá trị/ biến/ fixture) ở toplevel
++ Bộ nhớ của Main process và worker process là tách biệt với nhau, kể cả các worker với nhau cũng tách biệt
+
+
