@@ -1001,3 +1001,36 @@ tên tóm tắt và sẽ tự động được bê ra cái tên CHÍNH
 Vì sao lại là npm? khi dùng npm run thì lệnh luôn được thực thi từ Root và không cần lo mình đang đứng ở đâu
 
 Phần 3: test hook và sự tiến hóa lên Fixture
+Tứ trụ Hook (lifeCycle): beforeAll (phạm vi: worker), beforeEach (test), afterAll (woker), afterEach (test)
+Sai lầm rất hay mắc phải đó là khai báo các giá trị được sử dụng trong phần test ở trong phần beforeEach
+bởi vì khi khai báo giá trị ở trong đây thì khi chạy xong beforeEach thì giá trị này cũng sẽ bị biến mất 
+> bởi vậy nên thường khai báo biến ở global trước như let Page > sau đó vào beforeEach mới gán lại giá trị MỚI
+thì sẽ tránh được trường hợp biến không được tìm thấy
+
+Tuy nhiên thì Hooks lại có rất nhiều nhược điểm: 
++ Mất an toàn dữ liệu: khi khai báo cái bỏ rỗng bên ngoài mà quên gán lại giá trị của nó trong beforeEach thì 
+khi vào test sẽ bị cảnh báo 
++ PW sẽ sử dụng chung các worker cho nhieuf test khác nhau do đó nếu beforeEach không dọn dẹp data hoặc dùng lại
+các biến cũ thì sẽ dễ bị làm bẩn data cho các test case sau
++ Với lượng test case lớn thì sẽ khó đọc và bảo trị ( cứ phải lướt lên xem trong beforeEach là gì)
++ Không thể tái sử dụng trong các test case khác mà phải copy paste\
++ Nếu cứ khai báo page mới vào beforeEach thì nó sẽ khoog thể cấu hình cho các test case cần cấu hình riêng biệt
+Ví dụ:
+beforeAll khai báo giá trị của Page > trong file test thì close luôn Page > các file test sau không có page dùng
+worker 1 gán giá trị cho biến là A, nhưng worker 2 thì lại xóa biến A đi > khi worker 1 tìm lại thì không thấy a
+(ví dụ cho beforeAll)
+
+Ngoài ra phía bên dưới worker thì có thể phân tích:
++ beforeAll dùng trên phạm vi các woker, nếu nay bạn test trên máy nhiều worker thì data ở trong beforeAll tạo
+riêng biệt cho nhiều worker > có thể các test case sẽ không vị làm bẩn data > nhưng khi số lượng worker thấp, thì
+PW sẽ dùng 1 worker để thực hiện nhiều test case thì từ đó việc bị làm bẩn data sẽ xảy ra ở đây 
++ Đây cũng là trường hợp flaky test
++ Phi phạm nguyên tắc cô lập giữa các bài test
+
+>> Muốn tối ưu nhất thì nên dùng fixture để khởi tạo Page/Context/...
+Trường hợp dùng BeforeAll thường là các case dùng 1 lần như đọc file excel để phục vụ bài test > không cần tạo 
+fixture cho mệt mỏi
+Trường hợp muốn dùng BeforeEach: Điều hướng trong trang (sau khi đã Login)/các case chuyên biệt(fake thông tin)/
+reset trạng thái
+
+
