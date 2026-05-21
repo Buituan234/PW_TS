@@ -1118,4 +1118,82 @@ chuyển được các text văn bản thuần túy hoặc Json > Không thể v
 + Kể cả có gửi được hàm qua cho woker process thì cũng sẽ bị thiếu ngữ cảnh (các giá trị/ biến/ fixture) ở toplevel
 + Bộ nhớ của Main process và worker process là tách biệt với nhau, kể cả các worker với nhau cũng tách biệt
 
+Tại sao các biến môi trường (top level) trong bài test nên là các dữ liệu tĩnh?
+Bởi vì khi main process đọc dữ liệu thì nó sẽ gửi lệnh chi worker process là mày hãy chạy test A này đi, nhưng nếu dữ 
+liệu động và khi worker process chạy lại để lấy thông tin thì nó lại lấy ra một thông tin không trùng khớp với lệnh
+thì lúc này sẽ bị báo lỗi "test not found" hoặc "worker failed to load test"
+Vậy nên tên các bài test không bao giờ có các giá trị: random/date/api trả về thông tin Động
 
+Giải pháp để cố định dữ liệu:
+Cách tốt nhất để dữ liệu cho bài test luôn được cố định là ta có thể khai báo các data dạng const và không đổi giá TRỊ
+và có thể import từ các file data để clear hơn trong bài test
+Đối với các data lấy từ DB hoặc API: ta hãy gọi API để lấy thông tin đó 1 lần rồi ghi giá trị vào file data > sau đó
+trong bài test ta sẽ đọc data từ file đó (lúc này động đã hóa tĩnh)
+
+Để chạy nhanh hơn ta có thể set số lượng worker ở file config: trong trường hợp ta không set số lượng worker thì PW sẽ
+tự động phân tích máy của chúng ta, nếu máy của chúng ta có 8 core thì nó sẽ lấy từ 4-6 core để thực hiện test, giữ Số
+core còn lại để làm nhưng việc khác
+
+Ở chế độ bình thường chúng ta sẽ chỉ chạy 1 worker cho 1 test case, nhưng khi chúng ta set fullyParallel thì một file
+test có 10 test case sẽ được phân chia cho nhiều worker thực hiện test bài bài nhỏ > giúp tăng tốc độ test, nhưng có 
+điểm cần lưu ý là các test case cần tách biệt với nhau
+
+Cơ chế của fully parallel là nó sẽ chia nhỏ các test trong file test và làm phẳng tất cả các test case thành 1 danh sách
+phụ thuộc vào tên của file và tên của test case (sắp xếp theo a-z 0-9) > sau đó main process sẽ phân chia cho các worker 
+run
+
+Bài này vẫn có nhiều cấn cấn? lúc thì bảo main worker phân việc cho worker process (statis allocation), lúc thì bảo 
+lifecycle chạy theo cơ chế greedy queue (tranh cướp)
+
+Bài 21: Kỹ thuật Debug lỗi với trace viewer và cấu hình reporting từ cơ bản (HTML) đến nâng cao (Allure, Custom)
+- Trace viewer: nó là tập hợp các snapshot DOM tại các thời điểm, nó lưu network (API), consolog, source code, có thể 
+inspect (F12) để dò lại các vấn đề locator,...
+Khi dùng trace view thì nó sẽ đẻ cho chúng ta 1 file zip và file này thì nặng
+> Lời khuyên: Nên dùng chế độ 'on-first-retry': sẽ lưu trace view khi chạy lại case bị failed, lần chạy đầu ko lưu 
+hoặc dùng cơ chế 'retain-on-failure': lưu trace cho bất kỳ bài nào bị fail lần đầu tiên
+
+Flaky test: test chập chờn, lần test 1 thì failed lần 2 thì pass 
+Tại sao nên retry nhiều lần khi test trên CI/CD? vì để cứu quá trình deployment, giả sử cty đang cần đẩy code gấp lên 
+product, nhưng 1 case bị fail nếu ko thử lại thì sẽ cần fix code và lại chạy CI/CD 1 lần nữa > nhưng nếu cho retry và
+lần retry sau nó pass thì sẽ đưa vào trạng thái flaky (màu vàng)> quá trình deploy vẫn tiếp tục > dev có thể check sau
+
+Có nhiều cách để xem trace: phổ biến nhất là qua html report, hoặc có thể truy cập trang web xem trace chuyên dụng 
+của pw
+Note: trace view chạy rất nhanh nên với các case muốn check chuyển đổi giữa các trang thì cần thêm 1 bước check phần
+tử ở trang mới đã xuất hiện > lúc đó nó sẽ show trên trace view
+
+- Reporter
++ List reporter: Loại này sẽ im kết quả lên trên terminal
+Có obtion là prinStep: cho in kết quả của từng step trong test case không ?
++ HTML reporter: tự sinh ra trang web báo cáo
++ JUnit reporter: dùng cho hệ thống CI/CD (ra file xml)
++ JSON reporter: dùng để xuất dữ liệu thô cho các tool thống kê tự viết (ra file  Json)
+
+- Allure report nâng cao - "Báo cáo biết nói"
+cài đặt cấu hình:
+npm install -g allure
+npm install --save-dev allure-playwright allure-js-commons
+npm install -g allure: cài đặt allure global
+
+Ta có thể set up allure trong bài test
++ Ở trong phần test (test case của chúng ta): ta có thể setup các thông tin như
+await allure.epic(''): Module nào
+await allure.feature(''): chức năng gì
+await allure.story(''): Tên bài test
+await allure.severity(''): mức độ ưu tiên
+await allure.owner(''): người test là Ai
+await allure.description(''): Mô tả thêm về test case
+
+tiếp đó ta bao bọc các step bằng await allure.step() thay vì chỉ là test.step như bình Thường
+ở trong các step này ta có thể chụp ảnh kết quả để xác nhận các step này làm thành công chưa
+await allure.attachment()
+hoặc cũng có thể log lại các dữ liệu đã nhập bằng cách: 
+await stepContext("Email input", 'abc@gmail.com')
+await stepContext("Password input", '***')
+và phải khai báo trước khi điền trên locator thật nhé
+sau đó có thể chụp ảnh lại form sau khi điền bằng câu lệnh attachment phía trên
+
+Các vũ khí chính của allure report: 
++ await allure.attachment(name, content, type): ghim một file(ảnh, text, json) vào báo cáo
+thay vì chụp ảnh một cách bị động khi chỉ fail thôi thì ta chủ động chụp ảnh ở những bước quan trọng để làm proof 
++ await stepContext.parameter('name', 'value'): 
