@@ -1197,3 +1197,121 @@ Các vũ khí chính của allure report:
 + await allure.attachment(name, content, type): ghim một file(ảnh, text, json) vào báo cáo
 thay vì chụp ảnh một cách bị động khi chỉ fail thôi thì ta chủ động chụp ảnh ở những bước quan trọng để làm proof 
 + await stepContext.parameter('name', 'value'): 
+
+Bài 22: Khởi đầu thực chiến - API
+API là phương thức giao tiếp qua lại giữa FE và BE, nó sẽ gọi đến BE những thứ mã FE yêu câu từ đó trả về response
+từ server > nó còn là một lớp bảo vệ: xác định danh tính tài khoản, kiểm tra data truyền vào từ FE có chuẩn chưa,
+hoặc format lại thông tin user truyền vào như là ngày tháng
+
+Giữa BE và FE thì là 2 ngôn ngữ khác nhau thì làm sao để nó có thể giao tiếp được với nhau? 
+Đó là do thống nhất dùng một ngôn ngữ chung: JSON (Javascript object notation)
+
+Với 1 API request thì có 4 phần tử chính:
++ Method: Hành động muốn làm (get: lấy thông tin, put, path: Cập nhật tt, post: tạo dữ liệu, delete: Xóa dữ liệu)
++ Endpoint: Địa chỉ nhà
++ Header: Thông tin phụ (thông tin bên ngoài phong bì thư): application/json: thư này được viết bằng JSON, author:
+Bear abc...xyz (xác nhận role của tài khoản)
++ Body: Nội dung thư, thường là post/put/patch là sẽ có phần body này
+
+Với 1 API response thì có 2 phần cần lưu ý chính:
++ Status code (mã trạng thái):200 là thanh công, 400: Gửi dữ liệu sai format, 401: Chưa đăng nhập, 403: Không có
+quyền mặc dù đăng nhập rồi, 404: Not found, sai địa chỉ, 500: lỗi server
++ respone body: là dữ liệu JSON để FE lấy thông tin hiển thị lên màn hình
+
+Sự khác biệt giữa PUT và PATCH: đều là update nhưng PUT là sửa tất cả thông tin, và khi đó mặc dù nếu chỉ muốn sửa
+thông tin của 1 trường nhưng body của API request vẫn phải truyền tất cả các thông tin của các trường còn lại, nếu
+bỏ trống 1 trường thì mặc nhiên là sau khi update thì trường đó sẽ bị bỏ trống, patch thì chỉ là update 1 phần, và
+khi đó body của API sẽ chỉ chứa thông tin của trường được update
+
+cURL là gì: nó là 1 gói tin nén (tất cả về aPI trong 1 đoạn text): URL, Method, Header, Body chỉ trong 1 đoạn văn
+bản
+
+Có thể lấy cURL của 1 API bằng cách chuột phải vào API đó trong F12
+
+Với UI thì chúng ta thường dùng fixture: page, nhưng khi dùng API thì chúng ta lại dùng feature "request", và tất 
+nhiên nó cũng như page là luôn được làm sạch trước khi được sử dụng trong bài test mới (cookie) đồng thời nó cũng
+tự học các thông tin ở file config như baseURL hay extraHTTPHeaders (token), nó cũng sẽ tự dùng, ngoài ra nếu 
+trong bài test bạn gọi API login thành công thì các API tiếp theo sẽ tự động mang theo cookie đó
+
+Để lấy được các thông tin trả về sau khi gọi API thì cần khai báo thêm 1 biến để hứng
+const response = await request.post('/cbv', {data: {....}})
+tuy nhiên response này không phải là 1 text thuần túy/ respone json mà nó là 1 đối tượng object của class APIrespone
+nó là 1 wrapper (hộp chứa) bao bọc lấy tất cả các thông tin mà server gửi cho bạn
+Nếu muốn lấy ra dạng JSON của response: await respone.json() >> cần await
+Nếu muốn lấy ra text của respone: await response.text() >> cần await
+Nếu muốn lấy ra trạng thái của API:  respone.status()
+Nếu API trả về là dạng mảng dữ liệu thô (khi download file): dùng .body() để hứng
+
+Bạn có biết trước nay ta hay dùng hard assertion > expect() > khi đó nếu assert của chúng ta fail thì bài test sẽ 
+dừng lại ngay, nhưng ngoài ra có 1 loại nữa là soft assertion (mặc dù bị fail nhưng nó vẫn chạy tiếp)
+Cú pháp: expect.soft()
+Khi nào nên dùng: ví dụ khi kiểm tra giá trị của các trường trong response trả về (các dữ liệu độc lập với nhau)
+để nó quét qua tất cả 1 lượt xem các trường này có bao nhiêu trường lỗi > kiểm tra lại 1 thể
+Không nên dùng: khi mà bước sau phụ thuộc bước trước (UI), bởi vậy khi test UI thường ko nhắc đến nó
+
+
+Bài 23: Nền tảng giao thức API
+Authentication (xác thực): là quá trình xác minh danh tính người dùng, như khi bạn nhập email và password thì hệ 
+thống sẽ kiểm tra có tài khoản này trong db hay không > nếu đúng thì hệ thống cấp cho cái session/token
+Authorization (Kiểm tra phân quyền): nó sẽ kiểm tra người dùng có các quyền truy cập vào các tài nguyên nào đó hay
+không > như khi b click vào trang danh sách user trong khi bạn chỉ là staff bình thường thì sẽ bị lỗi 403 
+
+Trên thế giới, hiện đang quản lý phiên đăng nhập bằng 2 cách: 
++ Session-base Authentication: khi client login xong thì server tạo ra 1 sessionID lưu vào ram/db của server > sver 
+sẽ gửi sessionID này về cho trình duyệt > khi trình duyệt nhận được cookie thì nó lưu cookie vào vùng bộ nhớ của nó
+> mỗi lần client muốn thao tác gì đó trên trang thì trình duyệt sẽ tự động đính kèm cookie này vào header của API
+và gửi lên cho sever check > nếu server thấy à cái sessionID này hợp lệ > trả về dữ liệu còn nếu ko hợp lệ thì nó sẽ
+báo session hết hạn > bắt đăng nhập 401
+>> Nhưng làm theo cách này thì rất nặng về phía server khi nó cứ phải lưu các sessionID cho từng user 
++ JSON Web Token (JWT): là 1 chuỗi ký tự rất loằng ngoằng/dài nhưng thực tế có 3 phần ngăn cách nhau bởi dấu .
+AAAA.BBBB.CCCC. 
+Trong đó AAAA là phần header - nó chứa các thông tin về thuật mã hóa (alg: HS256 (thuật toán ký) hay typ: JWT)
+BBBB là phần chứa dữ liệu của user mà server gửi đến client: tên, quyền, thời điểm tạo sess, thời điểm hết hạn
+phần này được mã hóa Base64 nên có thể dễ dàng đọc được nên tuyệt đối ko để password vào đây
+CCCC là phần chữ ký bảo mật: server sẽ tạo ra chữ ký bằng công thức Hash(header + payload + secrekey), trong đó secret
+key là khóa bí mật nằm ở phía server không ai biết cả
+
+Luồng hoạt động của JWT như nào?
+client login > server sẽ check tài khoản này với db > nếu tài khoản ok > nó sẽ tạo ra JWT với secretKey > reponse cho
+phía client > client lưu JWT vào storageState/cookie > khi đó client muốn chuyển trang > nó sẽ đính kèm
+Authorization: Bearer JWT cùng header > server nhận được token thì nó sẽ giải mã và check lại secret key xem > nếu
+chính xác là secret và token chưa hết hạn > cho phép truy cập cùng vởi role trong token > nếu token hết hạn > 401
+
+Lưu JWT ở đâu thì an toàn nhất: đối với các dự án nhỏ/ khóa học thì nên lưu ở storageState khi đó JS có thể đọc ghi 
+thoải mái, nhưng hay mắc lỗi XSS (hacker chạy các đoạn script để lấy token) >> ĐỐi với các dự án to cần sự bảo mật như
+ngân hàng/production > lưu vào HttpOnly cookie > Khó triển khai hơn, JS sẽ không đọc được > An toàn hơn 
+
+Path param là gì? Query param là gì?
+Path param là một phần của đường dẫn URL > nằm phía sau base URL và sau dấu / nó đóng vai trò định danh > giúp xác Định
+một tài nguyên cụ thể (ví dụ xem chi tiết 1 đơn hàng > product/12345) > Đường dẫn sai trả về 404
+Query param (tham số truy vấn): nằm sau dấu ? và kết nối với nhau bằng dấu & trong url > đóng vai trò như bộ lọc/ sắp 
+xếp (sort), nó thường giúp lọc ra các thông tin mà chúng ta hay dùng filter để lọc 
+
+Trong pw thì muốn sử dụng query param thì ta ko viết trực tiếp vào phần url mà truyền vào tham số param > khi đó pw 
+sẽ tự format
+const response = await request.get('/users', {
+    // 👇 Playwright sẽ tự biến cái này thành: /users?role=admin&page=1&sort=desc
+    params: {
+      role: 'admin',
+      page: 1,
+      sort: 'desc'
+    }
+  });
+
+Query param áp dụng rất nhiều để thực hiện cơ chế phân trang: khi muốn load đến page nào chỉ cần page: 2 + limit: 3
+để giới hạn số lượng phần tử xuất hiện
+
+Nếu muốn upload file/ nhiều file thì ta thường dùng: multiple part/ form-data 
+const filePath = path.resolve(__dirname, '../test-data/avatar-cat.png');
+const response = await request.post('https://api-neko-coffee.autoneko.com/api/v1/users/upload-avatar', {
+    multipart: {
+      
+      // Khai báo trường dữ liệu là FILE
+      // 'file' ở đây chính là cái tên (Key / Name attribute) mà phía Backend yêu cầu bạn gửi lên
+      file: {
+        name: 'avatar-cat.png',       // Tên file hiển thị khi lên server
+        mimeType: 'image/png',        // Định dạng file (Kiểu MIME)
+        buffer: fs.readFileSync(filePath), // Đọc ruột file chuyển thành Buffer nhị phân thô
+      },
+})
+
