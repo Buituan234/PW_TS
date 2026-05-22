@@ -1171,9 +1171,9 @@ Có obtion là prinStep: cho in kết quả của từng step trong test case kh
 
 - Allure report nâng cao - "Báo cáo biết nói"
 cài đặt cấu hình:
-npm install -g allure
-npm install --save-dev allure-playwright allure-js-commons
 npm install -g allure: cài đặt allure global
+npm i allure-playwright: cài đặt allure tương thích với playwright
+npm i allure-js-commons: dùng để thiết kế các trường làm đẹp cho báo cáo
 
 Ta có thể set up allure trong bài test
 + Ở trong phần test (test case của chúng ta): ta có thể setup các thông tin như
@@ -1196,4 +1196,7 @@ sau đó có thể chụp ảnh lại form sau khi điền bằng câu lệnh at
 Các vũ khí chính của allure report: 
 + await allure.attachment(name, content, type): ghim một file(ảnh, text, json) vào báo cáo
 thay vì chụp ảnh một cách bị động khi chỉ fail thôi thì ta chủ động chụp ảnh ở những bước quan trọng để làm proof 
-+ await stepContext.parameter('name', 'value'): 
++ await stepContext.parameter('name', 'value'): hiển thị một bảng thông số nhỏ về name và value mà mình truyền
+vào
++ allure.step(name, callback): tương tự như test.step của pw nhưng tương thích với allure
+
