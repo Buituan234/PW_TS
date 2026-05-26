@@ -1313,5 +1313,43 @@ const response = await request.post('https://api-neko-coffee.autoneko.com/api/v1
         mimeType: 'image/png',        // Định dạng file (Kiểu MIME)
         buffer: fs.readFileSync(filePath), // Đọc ruột file chuyển thành Buffer nhị phân thô
       },
-})
+}})
+
+Bài 24: Thiết kế Clean API Automation Framework
+Orchestration (Điều phối): Quản lý thứ tự chạy test (Setup chạy trước, test chạy sau)
+|
+Abstraction (trừu tượng hóa): Che giấu sự phức tạp của HTTP request
+|
+Injection (Tiêm phụ thuộc): Cung cấp tài nguyên (Service, Token) vào test
+|
+Validation (Kiểm soát): Đảm bảo tính đúng đắn của dữ liệu
+
+Cách thiết kế chi tiết: 
+- Trụ cột 1: Điều phối với Project dependencies
+Thay vì dùng beforeAll hay globalSetup (khó debug), ta coi việc "Đăng nhập" là một test Project riêng
+Trong file setup này ta cần:
++ Check file token có tồn tại hay không
++ Decode JWT để check hạn sử dụng (expiry)
++ Chỉ login lại khi cần thiết > tăng tốc độ chạy bài test lên đáng kể khi chạy CI/CD lặp lại
+- Trụ cột 2: Abstraction với Service Object Pattern
+Ta tạo ra các class đại diện cho các nghiệp vụ API, thay vì gọi request.get() trần trụi
++ BaseService: Lớp cha > tự động inject Authorization header nếu có token, xử lyd URL, bọc các method GET/POST/...
+với Generic type <T>
++ Domain service (Auth service, Product service): Kế thừa base page
+Chứa các hàm nghiệp vụ của từng service: GetProducts(), CreateOrder()
+Giấu kín các đường dẫn enpoint (/api/v1/products)
+> Khi dev thay đôi đường dẫn thì QA chỉ cần sửa trong service class
+- Trụ cột 3: Dependency Injection với fixtures
++ Auth FIxture: Kế thừa Base, đọc file token do project setup sinh ra, cung cấp auth token
++ Service fixture: Kế thừa Auth fixture, nhiệm vụ: Khởi taoh new ProductService(request, authToken), cung cấp 
+productService, userService, orderService,...
+- Trụ cột 4: Type safety với interface
+Không bao  giờ dung any> MỌi respone trả về từ API phải được map với một interface
+> Giúp gợi ý code khi muốn lấy ra trường nào đó của API
+> Cảnh báo đỏ về việc chúng ta lấy ra các thông tin không tồn tại trong respone trả về
+
+Workflow: PW khởi động đọc config > Thấy có dependancy > chạy project setup > Kiểm tra token, login nếu cần, ghi
+file JSON > report: setup passed > pW khởi tạo các worker > Với mỗi file test thì kích hoạt các fixture > đọc
+file JSON > tạo ra các service > inject vào hàm test > Chạy các nghiệp vụ test
+
 
